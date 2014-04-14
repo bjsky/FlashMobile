@@ -1,4 +1,4 @@
-package potato.util
+package potato.utils
 {
 	public class StringUtils
 	{
