@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://texturepacker.com-->
+<!-- $TexturePacker:SmartUpdate:4980fc3cfc3a77ec98a4f2f47d409316$ -->
+<!--Format:
+n  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+-->
+<TextureAtlas imagePath="atlases.png" width="1024" height="512">
+    <sprite n="areaBg" x="592" y="2" w="307" h="248"/>
+    <sprite n="arrow_add" x="987" y="120" w="14" h="14" oX="0" oY="0" oW="16" oH="16"/>
+    <sprite n="button" x="928" y="279" w="81" h="30"/>
+    <sprite n="button_back" x="987" y="2" w="26" h="26"/>
+    <sprite n="button_back_hover" x="984" y="212" w="26" h="26"/>
+    <sprite n="button_down" x="901" y="212" w="81" h="30"/>
+    <sprite n="button_s1_blue" x="901" y="177" w="84" h="33"/>
+    <sprite n="button_s1_blue_click" x="901" y="72" w="84" h="33"/>
+    <sprite n="button_s1_green" x="901" y="142" w="84" h="33"/>
+    <sprite n="button_s1_green_click" x="901" y="37" w="84" h="33"/>
+    <sprite n="button_s1_red" x="901" y="107" w="84" h="33"/>
+    <sprite n="button_s1_red_click" x="901" y="2" w="84" h="33"/>
+    <sprite n="button_s_blue" x="935" y="383" w="66" h="28"/>
+    <sprite n="button_s_green" x="867" y="383" w="66" h="28"/>
+    <sprite n="button_s_hui" x="937" y="346" w="66" h="28"/>
+    <sprite n="button_s_shenhui" x="184" y="320" w="64" h="26" oX="0" oY="0" oW="66" oH="28"/>
+    <sprite n="check_off" x="1007" y="327" w="14" h="14" oX="1" oY="1" oW="16" oH="16"/>
+    <sprite n="check_on" x="1007" y="311" w="14" h="14" oX="1" oY="1" oW="16" oH="16"/>
+    <sprite n="controlclose" x="987" y="102" w="16" h="16"/>
+    <sprite n="controlmax" x="987" y="84" w="16" h="16"/>
+    <sprite n="controlmin" x="987" y="66" w="16" h="16"/>
+    <sprite n="dropDown_button" x="2" y="398" w="291" h="31"/>
+    <sprite n="dropDown_down" x="2" y="365" w="291" h="31"/>
+    <sprite n="dropDown_hover" x="2" y="431" w="285" h="29"/>
+    <sprite n="dropDown_list" x="588" y="252" w="290" h="92"/>
+    <sprite n="icon_box" x="987" y="30" w="16" h="16" oX="3" oY="3" oW="22" oH="22"/>
+    <sprite n="icon_browse" x="1000" y="262" w="16" h="12" oX="1" oY="2" oW="18" oH="18"/>
+    <sprite n="icon_delete" x="1005" y="346" w="15" h="17"/>
+    <sprite n="icon_edit" x="987" y="48" w="16" h="16" oX="1" oY="1" oW="18" oH="18"/>
+    <sprite n="icon_layout" x="1005" y="365" w="16" h="16" oX="3" oY="3" oW="22" oH="22"/>
+    <sprite n="icon_play" x="880" y="315" w="55" h="55"/>
+    <sprite n="icon_setting" x="1000" y="240" w="20" h="20" oX="0" oY="0" oW="22" oH="22"/>
+    <sprite n="panelBg" x="2" y="2" w="588" h="232"/>
+    <sprite n="panelBg2" x="303" y="279" w="261" h="193"/>
+    <sprite n="panel_close" x="1011" y="276" w="11" h="11" oX="0" oY="1" oW="13" oH="13"/>
+    <sprite n="panel_head" x="2" y="236" w="584" h="41"/>
+    <sprite n="swiches_off" x="937" y="311" w="68" h="33" oX="0" oY="0" oW="70" oH="33"/>
+    <sprite n="switches_on" x="928" y="244" w="70" h="33"/>
+    <sprite n="tabbar" x="2" y="462" w="180" h="41" oX="0" oY="0" oW="180" oH="43"/>
+    <sprite n="tabbar_select" x="2" y="320" w="180" h="43"/>
+    <sprite n="textinput" x="566" y="372" w="299" h="39"/>
+    <sprite n="textinput_hover" x="2" y="279" w="299" h="39"/>
+    <sprite n="toolkitBg" x="880" y="252" w="46" h="61"/>
+</TextureAtlas>
