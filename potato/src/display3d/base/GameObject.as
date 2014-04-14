@@ -4,10 +4,11 @@ package potato.display3d.base
 	
 	import core.display3d.ObjectContainer3D;
 
-	/** 3d游戏对象，适应u3d开发方式（可以理解为实体和行为集合）
-	 *  @author liuxin
-	 *  @date 2014.3.11
-	 * **/
+	/**
+	 * 3d游戏对象，适应u3d开发方式（可以理解为实体和行为集合）
+	 * @author liuxin
+	 * 
+	 */
 	public class GameObject extends ObjectContainer3D implements IGameObject
 	{
 		public function GameObject()

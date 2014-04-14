@@ -2,16 +2,17 @@ package potato.display3d.controller.load
 {
 	import potato.display3d.resource.IResource;
 
-	/** 常用的加载控制器
-	 *  @author:liuxin 
-	 *  @date:2014.3.27
-	 * **/
+	/**
+	 * 常用的加载控制器
+	 * @author win7
+	 * 
+	 */
 	public class CommonLoadController extends AbstractLoadController
 	{
 		
 		/**
-		 * 
-		 * @param isAsyn 同步：true/异步false
+		 *  
+		 * @param isSync 同步true/异步false
 		 * 
 		 */
 		public function CommonLoadController(isSync:Boolean=true)

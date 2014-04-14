@@ -3,13 +3,26 @@ package potato.display3d.controller.camera
 	import core.display3d.Camera3D;
 	import core.display3d.ObjectContainer3D;
 	
-	/** 悬停相机
-	 *  author:liuxin
-	 *  date:2014.3.12
-	 *  **/
+	/**
+	 *  悬停相机
+	 * @author liuxin
+	 * 
+	 */
 	public class HoverCameraController extends LookAtCameraController
 	{
-		/** 相机，观察对象，观察点距离，y轴旋转角度，仰角度，最大y轴旋转角度，最小y轴旋转角度，最大仰角，最小仰角**/
+		/**
+		 *  
+		 * @param camera 相机
+		 * @param lookAtObject 观察对象
+		 * @param distance 观察点距离
+		 * @param panAngle y轴旋转角度
+		 * @param tiltAngle 仰角度
+		 * @param maxPanAngle 最大y轴旋转角度
+		 * @param minPanAngle 最小y轴旋转角度
+		 * @param maxTiltAngle 最大仰角
+		 * @param minTiltAngle 最小仰角
+		 * 
+		 */
 		public function HoverCameraController(camera:Camera3D, lookAtObject:ObjectContainer3D=null,distance:Number=0,panAngle:Number=0,tiltAngle:Number=90
 			,maxPanAngle:Number=NaN,minPanAngle:Number=NaN,maxTiltAngle=90,minTiltAngle=-90)
 		{

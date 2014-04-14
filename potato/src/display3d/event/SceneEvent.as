@@ -1,7 +1,11 @@
 package potato.display3d.event
 {
 	import core.events.Event;
-	/** 场景事件**/
+	/**
+	 * 场景事件
+	 * @author win7
+	 * 
+	 */
 	public class SceneEvent extends Event
 	{
 		public function SceneEvent(type:String, bubbles:Boolean=false)

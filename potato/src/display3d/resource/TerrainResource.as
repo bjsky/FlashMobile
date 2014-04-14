@@ -13,7 +13,11 @@ package potato.display3d.resource
 	import potato.display3d.event.ResourceEvent;
 	import potato.utils.Utils;
 	
-	/** 地形资源**/
+	/**
+	 * 地形资源
+	 * @author liuxin
+	 * 
+	 */
 	public class TerrainResource extends AbsoluteResource
 	{
 		public function TerrainResource(path:String="",args:Array=null)

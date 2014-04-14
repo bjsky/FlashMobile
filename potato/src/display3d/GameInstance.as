@@ -37,8 +37,12 @@ package potato.display3d
 	import potato.mirage3d.data.SkillData;
 	import potato.utils.Utils;
 	
-	/** 游戏实例
-	 *  游戏的资源存储池和配置集合**/
+	/**
+	 * 游戏实例<br />
+	 * 游戏的资源和配置集合
+	 * @author win7
+	 * 
+	 */
 	public class GameInstance
 	{
 		public function GameInstance()

@@ -5,7 +5,15 @@ package potato.utils
 		public function StringUtils()
 		{	
 		}
-		/**用字符串填充数组，并返回数组副本*/
+		
+		/**
+		 * 用字符串填充数组，并返回数组副本
+		 * @param arr 要填充的数组
+		 * @param str 源字符串
+		 * @param type 数组数据类型
+		 * @return 
+		 * 
+		 */
 		public static function fillArray(arr:Array, str:String, type:Class = null):Array {
 			var temp:Array = arr.slice();
 			if (Boolean(str)) {

@@ -11,7 +11,11 @@ package potato.display3d.resource
 	import potato.mirage3d.data.MaterialData;
 	import potato.mirage3d.data.PassData;
 
-	/** 材质资源**/
+	/**
+	 * 材质资源
+	 * @author liuxin
+	 * 
+	 */
 	public class MeterialResource extends AbsoluteResource
 	{
 		public function MeterialResource(path:String="",args:Array=null)

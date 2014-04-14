@@ -2,7 +2,11 @@ package potato.display3d.resource
 {
 	import core.events.EventDispatcher;
 
-	/** 抽象资源**/
+	/**
+	 * 抽象资源
+	 * @author liuxin
+	 * 
+	 */
 	public class AbsoluteResource extends EventDispatcher implements IResource
 	{
 		public function AbsoluteResource(path:String="",args:Array=null)

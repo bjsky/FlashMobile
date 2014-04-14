@@ -2,7 +2,11 @@ package potato.display3d.event
 {
 	import core.events.Event;
 	
-	/** 资源事件**/
+	/**
+	 * 资源事件
+	 * @author liuxin
+	 * 
+	 */
 	public class ResourceEvent extends Event
 	{
 		/**

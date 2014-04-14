@@ -8,7 +8,7 @@ package potato.display3d
 
 	
 	/**
-	 * 效果，粒子的容器
+	 * 效果，粒子系统容器
 	 * @author liuxin
 	 * 
 	 */

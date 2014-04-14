@@ -1,8 +1,10 @@
 package potato.display3d.resource
 {
-	
-
-	/** 资源接口**/
+	/**
+	 * 资源接口
+	 * @author win7
+	 * 
+	 */
 	public interface IResource
 	{
 		/** 资源路径**/

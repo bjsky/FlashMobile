@@ -9,13 +9,24 @@ package potato.display3d.resource
 	
 	import potato.display3d.event.ResourceEvent;
 
-	/** 纹理资源**/
+	/**
+	 * 纹理资源
+	 * @author liuxin
+	 * 
+	 */
 	public class TextureResource extends AbsoluteResource
 	{
+		/**
+		 * 
+		 * @param path 纹理路径
+		 * @param args 参数
+		 * 
+		 */
 		public function TextureResource(path:String="",args:Array=null)
 		{
 			super(path,args);
 		}
+		
 		/** 材质**/
 		static public var textureDic:Dictionary=new Dictionary();
 		
@@ -24,7 +35,6 @@ package potato.display3d.resource
 			return _tex;
 		}
 		
-		/** 加载资源**/
 		override public function load():void{
 			if(textureDic[path]){
 				_tex=textureDic[path];

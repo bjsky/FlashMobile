@@ -14,9 +14,11 @@ package potato.display3d
 	import potato.display3d.event.ResourceEvent;
 	import potato.display3d.resource.TerrainResource;
 	
-	/** 场景类
-	 *  author:liuxin
-	 *  date:2014.3.17**/
+	/**
+	 * 场景类
+	 * @author liuxin
+	 * 
+	 */
 	public class Scene extends View3D implements IGameObject
 	{
 		public function Scene()
