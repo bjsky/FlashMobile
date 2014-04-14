@@ -1,2 +1,0 @@
-﻿id	path	atlas	cache	type	type1	type2
-gui	atlases.png	atlases.xml	1	1	1	1
