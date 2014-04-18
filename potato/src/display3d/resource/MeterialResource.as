@@ -6,7 +6,7 @@ package potato.display3d.resource
 	import core.display3d.Material;
 	import core.display3d.Pass;
 	
-	import potato.display3d.GameInstance;
+	import potato.display3d.Game3D;
 	import potato.display3d.event.ResourceEvent;
 	import potato.mirage3d.data.MaterialData;
 	import potato.mirage3d.data.PassData;
@@ -37,15 +37,15 @@ package potato.display3d.resource
 				_met=materialDic[path];
 				sendEvent();
 			}else{
-				_md= GameInstance.materialDataDic[path];
+				_md= Game3D.materialDataMap[path];
 				if (_md)
 				{
 					var pd:PassData=_md.passes[0];
-					var texUrl:String=GameInstance.texturePath+pd.texture;
+					var texUrl:String=Game3D.texturePath+pd.texture;
 					var texRes:TextureResource=new TextureResource(texUrl);		//声明一个纹理资源
 					texRes.addEventListener(ResourceEvent.TEXTURE_COMPLETE,onTextureLoaded);
 					//场景的加载器去加载
-					GameInstance.scene.loadController.load(texRes);
+					Game3D.scene.loadController.load(texRes);
 					
 				}else{
 					_met=getDefaultMaterial();

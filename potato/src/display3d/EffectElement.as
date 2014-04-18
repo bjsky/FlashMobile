@@ -54,7 +54,7 @@ package potato.display3d
 			var metRes:MeterialResource=new MeterialResource(_data.material);		//声明一个材质资源
 			metRes.addEventListener(ResourceEvent.MATERIAL_COMPLETE,onMaterialLoaded);
 			//场景的加载器去加载
-			GameInstance.scene.loadController.load(metRes);
+			Game3D.scene.loadController.load(metRes);
 			_particle.type=_data.type;
 			_particle.quota=_data.quota;
 			_particle.defaultWidth=_data.defaultWidth;
