@@ -6,10 +6,10 @@ package potato.display3d
 	import core.effects.ParticleEmitter;
 	import core.effects.ParticleSystem;
 	
+	import potato.display3d.data.EffectElemData;
+	import potato.display3d.data.ParticleEmitterData;
 	import potato.display3d.event.ResourceEvent;
 	import potato.display3d.resource.MeterialResource;
-	import potato.mirage3d.data.EffectElemData;
-	import potato.mirage3d.data.ParticleEmitterData;
 	import potato.utils.DelayTrigger;
 	
 	

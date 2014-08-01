@@ -2,8 +2,8 @@ package potato.display3d
 {
 	import core.display3d.ObjectContainer3D;
 	
-	import potato.mirage3d.data.EffectData;
-	import potato.mirage3d.data.EffectElemData;
+	import potato.display3d.data.EffectData;
+	import potato.display3d.data.EffectElemData;
 	import potato.utils.DelayTrigger;
 
 	

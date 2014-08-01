@@ -18,23 +18,23 @@ package potato.display3d
 	import core.effects.ScaleAffector;
 	import core.filesystem.File;
 	
-	import potato.mirage3d.data.ActorEffectData;
-	import potato.mirage3d.data.BoxEmitterData;
-	import potato.mirage3d.data.CylinderEmitterData;
-	import potato.mirage3d.data.EffectData;
-	import potato.mirage3d.data.EffectElemData;
-	import potato.mirage3d.data.EllipsoidEmitterData;
-	import potato.mirage3d.data.HollowEllipsoidEmitterData;
-	import potato.mirage3d.data.LocatorData;
-	import potato.mirage3d.data.MaterialData;
-	import potato.mirage3d.data.MeshData;
-	import potato.mirage3d.data.ObjData;
-	import potato.mirage3d.data.ParticleEmitterData;
-	import potato.mirage3d.data.PassData;
-	import potato.mirage3d.data.PointEmitterData;
-	import potato.mirage3d.data.PolarEmitterData;
-	import potato.mirage3d.data.RingEmitterData;
-	import potato.mirage3d.data.SkillData;
+	import potato.display3d.data.ActorEffectData;
+	import potato.display3d.data.BoxEmitterData;
+	import potato.display3d.data.CylinderEmitterData;
+	import potato.display3d.data.EffectData;
+	import potato.display3d.data.EffectElemData;
+	import potato.display3d.data.EllipsoidEmitterData;
+	import potato.display3d.data.HollowEllipsoidEmitterData;
+	import potato.display3d.data.LocatorData;
+	import potato.display3d.data.MaterialData;
+	import potato.display3d.data.MeshData;
+	import potato.display3d.data.ObjData;
+	import potato.display3d.data.ParticleEmitterData;
+	import potato.display3d.data.PassData;
+	import potato.display3d.data.PointEmitterData;
+	import potato.display3d.data.PolarEmitterData;
+	import potato.display3d.data.RingEmitterData;
+	import potato.display3d.data.SkillData;
 	import potato.utils.Utils;
 	
 	/**
@@ -63,15 +63,16 @@ package potato.display3d
 		 * @param _texturePath	纹理路径
 		 * 
 		 */
-		static public function initResource(materialDataPath:String,_texturePath:String):void{
+		static public function initResource(materialDataPath:String,theTexturePath:String):void{
 			regist3DAlias();
 			
-			var root:String=Utils.getDefaultPath('');
+//			var root:String=Utils.getDefaultPath('');
 			//纹理
-			texturePath=root+_texturePath;
+//			texturePath=root+_texturePath;
 			
 			//材质
-			materialDataPath=root+materialDataPath;
+//			materialDataPath=root+materialDataPath;
+			texturePath=theTexturePath;
 			materialDataMap=File.readByteArray(materialDataPath).readObject();
 		}
 		

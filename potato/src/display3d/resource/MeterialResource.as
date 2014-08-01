@@ -7,9 +7,9 @@ package potato.display3d.resource
 	import core.display3d.Pass;
 	
 	import potato.display3d.Game3D;
+	import potato.display3d.data.MaterialData;
+	import potato.display3d.data.PassData;
 	import potato.display3d.event.ResourceEvent;
-	import potato.mirage3d.data.MaterialData;
-	import potato.mirage3d.data.PassData;
 
 	/**
 	 * 材质资源
