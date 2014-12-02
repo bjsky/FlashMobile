@@ -1,23 +1,34 @@
 package potato.component
 {
+	import core.display.DisplayObject;
 	import core.display.DisplayObjectContainer;
 	
-	import potato.event.UIEvent;
+	import potato.component.interf.IContainer;
+	import potato.component.interf.IDataBinding;
+	import potato.component.interf.ISprite;
+	import potato.event.PotatoEvent;
+	import potato.manager.RenderManager;
 	
 	/**
-	 * 空容器 
+	 * 容器. 
+	 * <p>容器是实现了IContainer接口的组件</p>
 	 * @author liuxin
 	 * 
 	 */
 	public class Container extends DisplayObjectContainer
-		implements IContainer
+		implements ISprite,IContainer,IDataBinding
 	{
+		/**
+		 * 创建容器 
+		 * @param width 宽
+		 * @param height 高
+		 * 
+		 */
 		public function Container(width:Number=NaN,height:Number=NaN)
 		{
 			super();
-			this.$width=width;
-			this.$height=height;
-			render();
+			this.width=width;
+			this.height=height;
 		}
 		
 		//----------------------------
@@ -26,6 +37,97 @@ package potato.component
 		protected var _width:Number;
 		protected var _height:Number;
 		protected var _scale:Number;
+		private var _dataProvider:Object;
+		private var _validateMode:uint=RenderManager.CALLLATER;
+		
+		/**
+		 * 数据绑定 
+		 * @return 
+		 * 
+		 */
+		public function get dataProvider():Object
+		{
+			return _dataProvider;
+		}
+		
+		public function set dataProvider(value:Object):void
+		{
+			_dataProvider = value;
+			for (var prop:String in _dataProvider) {
+				if (hasOwnProperty(prop)) {
+					if(this[prop] is IDataBinding)
+						IDataBinding(this[prop]).dataProvider=_dataProvider[prop];
+					else
+						this[prop] = _dataProvider[prop];
+				}
+			}
+		}
+		
+		
+		/**
+		 * 渲染模式
+		 * @return 
+		 * 
+		 */
+		public function get validateMode():uint
+		{
+			return _validateMode;
+		}
+		
+		public function set validateMode(value:uint):void
+		{
+			_validateMode = value;
+			RenderManager.validateNow(this);
+		}
+		
+		/**
+		 * 组件失效
+		 * @param method
+		 * @param args
+		 * 
+		 */
+		public function invalidate(method:Function, args:Array = null):void{
+			RenderManager.invalidateProperty(this,method,args);
+		}
+		
+		/**
+		 * 验证组件
+		 * 
+		 */
+		public function validate():void{
+			render();
+		}
+		
+		
+		
+		override public function get width():Number{
+			if(!isNaN(_width))
+				return _width;
+			else
+				return measureWidth;
+		}
+		
+		/**
+		 * 获取测量宽度
+		 * @return 
+		 * 
+		 */
+		public function get measureWidth():Number{
+			commitMeasure();
+			
+			var max:Number = 0;
+			for (var i:int = numChildren - 1; i > -1; i--) {
+				var comp:DisplayObject = getChildAt(i);
+				if (comp.visible) {
+					max = Math.max(comp.x + comp.width*comp.scaleX, max);
+				}
+			}
+			return max;
+		}
+		
+		public function get explicitWidth():Number{
+			return _width;
+		}
 		
 		/**
 		 * 宽度
@@ -33,14 +135,39 @@ package potato.component
 		 * 
 		 */
 		public function set width(value:Number):void{
-			$width=value;
-			render();
+			if(_width!=value){
+				_width=value;
+				invalidate(render);
+			}
 		}
-		override public function get width():Number{
-			return _width;
+		
+		override public function get height():Number{
+			if(!isNaN(_height))
+				return _height;
+			else
+				return measureHeight;
 		}
-		public function set $width(value:Number):void{
-			_width=value;
+		
+		/**
+		 * 获取测量高度
+		 * @return 
+		 * 
+		 */
+		public function get measureHeight():Number{
+			commitMeasure();
+			
+			var max:Number = 0;
+			for (var i:int = numChildren - 1; i > -1; i--) {
+				var comp:DisplayObject = getChildAt(i);
+				if (comp.visible) {
+					max = Math.max(comp.y + comp.height*comp.scaleY, max);
+				}
+			}
+			return max;
+		}
+		
+		public function get explicitHeight():Number{
+			return _height;
 		}
 		/**
 		 * 高度 
@@ -48,15 +175,12 @@ package potato.component
 		 * 
 		 */
 		public function set height(value:Number):void{
-			$height=value;
-			render();
+			if(_height!=value){
+				_height=value;
+				invalidate(render);
+			}
 		}
-		override public function get height():Number{
-			return _height;
-		}
-		public function set $height(value:Number):void{
-			_height=value;
-		}
+		
 		/**
 		 * 缩放 
 		 * @param value
@@ -71,9 +195,31 @@ package potato.component
 		}
 		
 		
-		public function render():void{
+		
+		//------------------------
+		// 渲染
+		//------------------------
+		
+		/**
+		 * 提交内容大小
+		 * 
+		 */
+		protected function commitMeasure():void{
 			
-			dispatchEvent(new UIEvent(UIEvent.RENDER));
+		}
+		
+		/**
+		 * 渲染组件内容 
+		 * 
+		 */
+		protected function render():void{
+			this.dispatchEvent(new PotatoEvent(PotatoEvent.RENDER_COMPLETE));
+		}
+		
+		override public function dispose():void{
+			super.dispose();
+			RenderManager.dispose(this);
+			
 		}
 	}
 }

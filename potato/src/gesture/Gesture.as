@@ -11,7 +11,8 @@ package potato.gesture
 	import potato.manager.GestureManager;
 
 	/**
-	 * 手势类 手势是触摸事件的自定义验证，不存在冒泡的概念，允许阻止冒泡的touch事件的产生的后续手势验证
+	 * 手势.
+	 * <p>所有手势的基类。包括手势状态的定义，开始、移动、结束触摸事件的统一处理等</p>
 	 * @author liuxin
 	 * 
 	 */
@@ -44,8 +45,7 @@ package potato.gesture
 		/**
 		 * 开始
 		 */
-		static public const BEGAN:String="BEGAN";
-		
+		static public const BEGIN:String="BEGIN";
 		/**
 		 * 改变
 		 */
@@ -75,12 +75,17 @@ package potato.gesture
 		private var _state:String=POSSIBLE;
 		private var _enable:Boolean=true;
 		
+		/**
+		 * 冒泡 
+		 * @return 
+		 * 
+		 */
 		potato_internal function get bubbles():Boolean{
 			return _bubbles;
 		}
 
 		/**
-		 * 手势的对象 
+		 * 显示对象 
 		 * @return 
 		 * 
 		 */
@@ -90,7 +95,7 @@ package potato.gesture
 		}
 		
 		/**
-		 * 手势的状态 
+		 * 状态 
 		 * @return 
 		 * 
 		 */
@@ -120,8 +125,7 @@ package potato.gesture
 		}
 
 		/**
-		 * 阻止上层事件冒泡，但不组织当前显示层
-		 * @see potato.gestures.Gestures.stopImmediatePropagation stopImmediatePropagation()
+		 * 阻止所有手势冒泡
 		 */
 		public function stopPropagation():void {
 			_bubbles = false;
@@ -135,7 +139,7 @@ package potato.gesture
 		protected var _location:Point = new Point();
 		
 		/**
-		 * 唯一的触摸点 
+		 * 手势的首次触摸对象
 		 * @return 
 		 * 
 		 */		
@@ -175,7 +179,7 @@ package potato.gesture
 			
 		
 		/**
-		 * 触摸点开始处理 
+		 * 触摸开始处理 
 		 * @param touch
 		 * 
 		 */
@@ -184,50 +188,56 @@ package potato.gesture
 				_touchesCount++;
 			_touchesMap[touch.id] = touch;
 			
+//			Logger.getLog("Gesture").debug("type:"+getQualifiedClassName(this)+",count:"+_touchesCount+",id:"+touch.id);
 			if(_touchesCount==1)
 				_touch=touch;
 			
-			this.dispatchEvent(new GestureEvent(GestureEvent.TOUCH_BEGIN));
+			this.dispatchEvent(new GestureEvent(GestureEvent.GESTURE_TOUCH_BEGIN));
 			onTouchBegin(touch);
 		}
 		
 		/**
-		 * 触摸点移动处理 
+		 * 触摸移动处理 
 		 * @param touch
 		 * 
 		 */
 		potato_internal function touchMoveHanlder(touch:Touch):void{
 			_touchesMap[touch.id] = touch;
 			
-			this.dispatchEvent(new GestureEvent(GestureEvent.TOUCH_MOVE));
+			this.dispatchEvent(new GestureEvent(GestureEvent.GESTURE_TOUCH_MOVE));
 			onTouchMove(touch);
 		}
 		/**
-		 * 触摸点结束处理 
+		 * 触摸结束处理 
 		 * @param touch
 		 * 
 		 */
 		potato_internal function touchEndHanlder(touch:Touch):void{
 			delete _touchesMap[touch.id];
 			_touchesCount--;
+//			Logger.getLog("Gesture").debug("count:"+_touchesCount);
 			
-			this.dispatchEvent(new GestureEvent(GestureEvent.TOUCH_END));
+			this.dispatchEvent(new GestureEvent(GestureEvent.GESTURE_TOUCH_END));
 			onTouchEnd(touch);
 		}
 		
+		/**
+		 * 触摸取消处理 
+		 * @param touch
+		 * 
+		 */
 		potato_internal function touchCancelHandler(touch:Touch):void
 		{
-			delete _touchesMap[touch.id];
-			_touchesCount--;
+			if(_touchesMap[touch.id]){
+				delete _touchesMap[touch.id];
+				_touchesCount--;
+			}
 			
 			onTouchCancel(touch);
 		}
 		
-		protected function onTouchCancel(touch:Touch):void
-		{
-		}
 		/**
-		 * 子类重写触摸点开始处理 
+		 * 子类重写触摸开始处理 
 		 * @param touch
 		 * 
 		 */
@@ -236,7 +246,7 @@ package potato.gesture
 		}
 		
 		/**
-		 * 子类重写触摸点移动处理 
+		 * 子类重写触摸移动处理 
 		 * @param touch
 		 * 
 		 */
@@ -245,7 +255,7 @@ package potato.gesture
 		}
 		
 		/**
-		 * 子类重写触摸点结束处理 
+		 * 子类重写触摸结束处理 
 		 * @param touch
 		 * 
 		 */
@@ -253,6 +263,20 @@ package potato.gesture
 			//			trace("["+eventType+"]touchEnd");
 		}
 		
+		/**
+		 * 子类重写触摸取消处理 
+		 * @param touch
+		 * 
+		 */
+		protected function onTouchCancel(touch:Touch):void
+		{
+		}
+		
+		
+		/**
+		 * 释放资源 
+		 * 
+		 */
 		override public function dispose():void{
 			super.dispose();
 			

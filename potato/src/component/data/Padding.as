@@ -3,12 +3,20 @@ package potato.component.data
 	import flash.net.registerClassAlias;
 
 	/**
-	 * 填充
+	 * 填充.
 	 * @author liuxin
 	 * 
 	 */
 	public class Padding
 	{
+		/**
+		 * 创建填充
+		 * @param paddingLeft 左
+		 * @param paddingTop 上
+		 * @param paddingRight 右
+		 * @param paddingBottom 下
+		 * 
+		 */		
 		public function Padding(paddingLeft:Number=0,paddingTop:Number=0,paddingRight:Number=0,paddingBottom:Number=0)
 		{
 			this.paddingLeft=paddingLeft;
@@ -23,24 +31,7 @@ package potato.component.data
 		static public function registerAlias():void{
 			registerClassAlias("potato.component.data.Padding",Padding);
 		}
-//		/**
-//		 * 创建一个填充 
-//		 * @param paddingLeft
-//		 * @param paddingTop
-//		 * @param paddingRight
-//		 * @param paddingBottom
-//		 * @return 
-//		 * 
-//		 */
-//		static public function create(paddingLeft:Number=0,paddingTop:Number=0,paddingRight:Number=0,paddingBottom:Number=0):Padding{
-//			var padding:Padding=new Padding();
-//			padding.paddingLeft=paddingLeft;
-//			padding.paddingRight=paddingRight;
-//			padding.paddingTop=paddingTop;
-//			padding.paddingBottom=paddingBottom;
-//			return padding;
-//		}
-		
+
 		private var _paddingLeft:Number=0;
 		private var _paddingRight:Number=0;
 		private var _paddingTop:Number=0;

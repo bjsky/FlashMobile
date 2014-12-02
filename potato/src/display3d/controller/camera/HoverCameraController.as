@@ -24,7 +24,7 @@ package potato.display3d.controller.camera
 		 * 
 		 */
 		public function HoverCameraController(camera:Camera3D, lookAtObject:ObjectContainer3D=null,distance:Number=0,panAngle:Number=0,tiltAngle:Number=90
-			,maxPanAngle:Number=NaN,minPanAngle:Number=NaN,maxTiltAngle=90,minTiltAngle=-90)
+			,maxPanAngle:Number=NaN,minPanAngle:Number=NaN,maxTiltAngle:Number=90,minTiltAngle:Number=-90)
 		{
 			super(camera, lookAtObject);
 			_distance=distance;

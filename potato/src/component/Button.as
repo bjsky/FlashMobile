@@ -9,63 +9,201 @@ package potato.component
 	import potato.component.data.BitmapSkin;
 	import potato.component.data.Padding;
 	import potato.component.data.TextFormat;
-	import potato.utils.DebugUtil;
+	import potato.component.interf.IDataBinding;
+	import potato.component.interf.IGroupedToggle;
+	import potato.component.interf.ISprite;
+	import potato.event.PotatoEvent;
+	import potato.logger.Logger;
+	import potato.manager.RenderManager;
 	import potato.utils.StringUtil;
 
+	
+	/**
+	 * 选择改变事件.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="selectChange",type="potato.event.PotatoEvent")]
+	
+	/**
+	 * 按钮. 
+	 * <p>可以设置正常、按下、禁用、状态的皮肤样式，设置isToggle属性为true，表示开关按钮，可以设置选中状态下的正常，按下，禁用皮肤。
+	 * 按钮的大小，由按钮的皮肤或者设置的宽高决定：当设置大小时，按钮的皮肤根据大小缩放，否则按钮的大小为皮肤的大小。不同状态下的皮肤对应不同的按钮大小。</p>
+	 * <p>按钮可以设置text、htmlText文字，或者设置图片文字textSkin。设置文字时，通过设置textPadding文字填充改变文字的位置或者textFormat改变文字的内容样式</p>
+	 * <p>按钮实现了<code>IGroupedToggle</code>接口，可以指定从属的按钮组从而创建带选中状态的按钮组。
+	 * 当按钮的选中状态改变时，按钮派发PotatoEvent.SELECT_CHANGE事件，从属的组派发PotatoEvent.GROUP_SELECT_CHANGE事件，可以侦听事件处理选中改变。</p>
+	 * @author liuxin
+	 * 
+	 * @example 包含一个按钮的样例
+	 * <listing>
+	 * class ButtonExample{
+	 * 
+	 * 	public function ButtonExample(){
+	 * 
+	 * 		var btn:Button=new Button();
+	 * 		addChild(btn);
+	 * 
+	 * 		//皮肤
+	 * 		var btn2:Button=new Button("button_up_skin,button_down_skin,button_disable_skin","Click me!",100,36);
+	 * 		//文字样式
+	 * 		btn2.textFormat=new TextFormat("黑体",26,0x000,TextField.ALIGN_CENTER,TextField.ALIGN_CENTER);
+	 * 		//文字填充
+	 * 		btn2.textPadding=new Padding(10,4,10,4);
+	 * 		addChild(btn2);
+	 * 
+	 * 		//九宫格皮肤
+	 * 		var skins:Array=[new BitmapSkin("button_up_skin","5,5,5,5"),new BitmapSkin("button_down_skin","5,5,5,5")];
+	 * 		var btn3:Button=new Button(skins,"Click me!",100,36);
+	 * 		btn3.htmlText="<b>Html Text Here!</b>";
+	 * 		addChild(btn3);
+	 * 
+	 * 		//图片文字
+	 * 		var btn4:Button=new Button("button_up_skin,button_down_skin,button_disable_skin","",100,36);
+	 * 		var front:Bitmap=btn4.addChild(new Bitmap("frontImage"));
+	 * 		front.x=5;
+	 * 		front.y=5;
+	 * 		addChild(btn4);
+	 * 
+	 * 		//选中
+	 * 		var skins:String="button_up_skin,button_down_skin,button_disable_skin,button_select_up_skin,button_select_down_skin,button_select_disable_skin";
+	 * 		var btn5:Button=new Button(skins,"click me!",100,36);
+	 * 		btn5.isToggle=true;
+	 * 		btn5.addEventListener(PotatoEvent.SELECT_CHANGE,onBtnSelectedChange);
+	 * 		btn5.selected=true;
+	 * 		addChild(btn5);
+	 * 
+	 * 		//按钮组
+	 * 		var group:ToggleGroup=new ToggleGroup();
+	 * 		group.addEventListener(PotatoEvent.GROUP_SELECT_CHANGE,onGroupSelectedChange);
+	 * 
+	 * 		var gBtn1:Button=new Button("button_up_skin,,,button_select_up_skin","选项1");
+	 * 		gBtn1.isToggle=true;
+	 * 		gBtn1.toggleGroup=group;
+	 * 		addChild(gBtn1);
+	 * 		var gBtn2:Button=new Button("button_up_skin,,,button_select_up_skin","选项2");
+	 * 		gBtn2.isToggle=true;
+	 * 		gBtn2.toggleGroup=group;
+	 * 		addChild(gBtn2);
+	 * 
+	 * 		gBtn1.selected=true;
+	 *
+	 * 	}
+	 * 
+	 * 	function onBtnSelectedChange(e:PotatoEvent):void
+	 * 	{
+	 * 		var btn:Button=e.currentTarget as Button;
+	 * 		trace(btn.selected); 
+	 * 	}
+	 * 
+	 * 
+	 * 	function onGroupSelectedChange(e:PotatoEvent):void
+	 * 	{
+	 * 		var group:ToggleGroup=e.currentTarget as ToggleGroup;
+	 * 		trace(group.selectIndex);
+	 * 	}
+	 * }
+	 * </listing>
+	 */
 	public class Button extends DisplayObjectContainer
-		implements ISprite,IGroupItem
+		implements ISprite,IGroupedToggle,IDataBinding
 	{
-		public function Button(skins:String="",text:String="",width:Number=NaN,height:Number=NaN,
-											textformat:TextFormat=null,textPadding:Padding=null)
+		/**
+		 * 创建按钮
+		 * @param skins 皮肤字符串（正常，按下，禁用，选中，选中禁用）
+		 * @param text 文字
+		 * @param width 宽
+		 * @param height 高
+		 * @param textformat 文字样式
+		 * @param textPadding 文字填充
+		 * @param isToggle 开关按钮
+		 */
+		public function Button(skins:*=null,text:String="",width:Number=NaN,height:Number=NaN,
+											textformat:TextFormat=null,textPadding:Padding=null,isToggle:Boolean=false)
 		{
 			super();
 			createChildren();
 			
 			this.addEventListener(TouchEvent.TOUCH_BEGIN,onBegin);
+			this.addEventListener(TouchEvent.MULTI_TOUCH_BEGIN,onBegin);
 			this.addEventListener(TouchEvent.TOUCH_END,onEnd);
+			this.addEventListener(TouchEvent.MULTI_TOUCH_END,onEnd);
 			
-			this.$skins=skins;
-			this.$text=text;
-			this.$width=width;
-			this.$height=height;
-			this.$textFormat=textformat;
-			this.$textPadding=textPadding;
-			this.render();
+			this.skins=skins;
+			this.text=text;
+			this.width=width;
+			this.height=height;
+			this.textFormat=textformat;
+			this.textPadding=textPadding;
 		}
 
-		public function setSkins(upSkin:BitmapSkin=null,downSkin:BitmapSkin=null,disableSkin:BitmapSkin=null
-								 ,selectedSkin:BitmapSkin=null):void{
-			this.$upSkin=upSkin;
-			this.$downSkin=downSkin;
-			this.$disableSkin=disableSkin;
-			this.$selectedSkin=selectedSkin;
-			this.render();
-		}
-		
-		
 		/**
 		 * 正常 
 		 */
-		static private const UP:uint=0;			
+		static public const UP_SKIN:uint=0;			
 		/**
 		 * 按下 
 		 */
-		static private const DOWN:uint=1;
+		static public const DOWN_SKIN:uint=1;
 		/**
 		 * 禁用 
 		 */
-		static private const DISABLE:uint=2;
+		static public const DISABLE_SKIN:uint=2;
 		/**
-		 * 选中 
+		 * 选中 正常 
 		 */
-		static private const SELECTED:uint=3;
+		static public const SELECTED_UP_SKIN:uint=3;
+		/**
+		 * 选中 按下 
+		 */
+		static public const SELECTED_DOWN_SKIN:uint=4;
+		
+		/**
+		 * 选中 禁用 
+		 */
+		static public const SELECTED_DISABLE_SKIN:uint=5;
 		
 		//----------------------------
 		//	ISprite
 		//----------------------------
-		protected var _width:Number;
-		protected var _height:Number;
-		protected var _scale:Number;
+		private var _width:Number;
+		private var _height:Number;
+		private var _scale:Number;
+		private var _validateMode:uint=RenderManager.CALLLATER;
+		
+		
+		/**
+		 * 渲染模式
+		 * @return 
+		 * 
+		 */
+		public function get validateMode():uint
+		{
+			return _validateMode;
+		}
+		
+		public function set validateMode(value:uint):void
+		{
+			_validateMode = value;
+			RenderManager.validateNow(this);
+		}
+		
+		/**
+		 * 组件失效
+		 * @param method
+		 * @param args
+		 * 
+		 */
+		public function invalidate(method:Function, args:Array = null):void{
+			RenderManager.invalidateProperty(this,method,args);
+		}
+		
+		/**
+		 * 验证
+		 * 
+		 */
+		public function validate():void{
+			render();
+		}
 		
 		/**
 		 * 宽度
@@ -73,30 +211,37 @@ package potato.component
 		 * 
 		 */
 		public function set width(value:Number):void{
-			$width=value;
-			render();
+			if(_width!=value){
+				_width=value;
+				invalidate(render);
+			}
 		}
 		override public function get width():Number{
-			return _width;
+			if(!isNaN(_width))
+				return _width;
+			else{
+				return currentSkin?currentSkin.width:0;
+			}
 		}
-		public function set $width(value:Number):void{
-			_width=value;
-		}
+		
 		/**
 		 * 高度 
 		 * @param value
 		 * 
 		 */
 		public function set height(value:Number):void{
-			$height=value;
-			render();
+			if(_height!=value){
+				_height=value;
+				invalidate(render);
+			}
 		}
 		override public function get height():Number{
-			return _height;
+			if(!isNaN(_height))
+				return _height;
+			else
+				return currentSkin?currentSkin.height:0;
 		}
-		public function set $height(value:Number):void{
-			_height=value;
-		}
+		
 		/**
 		 * 缩放 
 		 * @param value
@@ -106,64 +251,77 @@ package potato.component
 			_scale=value;
 			scaleX=scaleY=_scale;
 		}
+		
 		public function get scale():Number{
 			return _scale;
 		}
 		//------------------------------
 		// properties
 		//------------------------------
-		private var _skins:String="";
-		private var _skinsArr:Array=["","","",""];
-		private var _textSkin:BitmapSkin;
-		private var _textOffsetX:Number;
-		private var _textOffsetY:Number;
+		private var _skins:*;
+		private var _skinsArr:Array=[null,null,null,null,null,null];
 		private var _disable:Boolean=false;
 		private var _skinsMap:Dictionary=new Dictionary();
-		private var _state:uint=UP;
+		private var _state:uint=UP_SKIN;
 		private var _selected:Boolean=false;
-		protected var _data:Object;
+		private var _data:Object;
+		private var _isDown:Boolean=false;
+		private var _dataProvider:Object;
+		
+		/**
+		 * 数据绑定 
+		 * @return 
+		 * 
+		 */
+		public function get dataProvider():Object
+		{
+			return _dataProvider;
+		}
+		
+		public function set dataProvider(value:Object):void
+		{
+			_dataProvider = value;
+			for (var prop:String in _dataProvider) {
+				if (hasOwnProperty(prop)) {
+					if(this[prop] is IDataBinding)
+						IDataBinding(this[prop]).dataProvider=_dataProvider[prop];
+					else
+						this[prop] = _dataProvider[prop];
+				}
+			}
+		}
 		
 		/**
 		 * 皮肤字符串 [正常，按下，禁用，选中]
 		 * @param value
 		 * 
 		 */
-		public function set skins(value:String):void{
-			$skins=value;
-			render();
+		public function set skins(value:*):void{
+			_skins=value;	
+			_skinsArr=StringUtil.fillSkins(_skinsArr,value);
+			for (var i:int=0;i<_skinsArr.length;i++){
+				_skinsMap[i]=_skinsArr[i];//BitmapSkin.createWithName(skinStr);
+			}
+			invalidate(render);
 		}
-		public function get skins():String{
+		public function get skins():*{
 			return _skins;
 		}
 		
-		public function set $skins(value:String):void{
-			_skins=value;	
-			_skinsArr=StringUtil.fillArray(_skinsArr,value,String);
-			for (var i:int=0;i<_skinsArr.length;i++){
-				var skinStr:String=_skinsArr[i];
-				if(skinStr){
-					var bSkin:BitmapSkin=new BitmapSkin();
-					bSkin.textureName=skinStr;
-					_skinsMap[i]=bSkin;//BitmapSkin.createWithName(skinStr);
-				}
-			}
-		}
 		/**
 		 * 正常皮肤 
 		 * @param value
 		 * 
 		 */
 		public function set upSkin(value:BitmapSkin):void{
-			$upSkin=value;
-			if(_state==UP)
-				render();
+			_skinsMap[UP_SKIN]=value;
+			if(_state==UP_SKIN)
+				invalidate(render);
 		}
 		public function get upSkin():BitmapSkin{
-			return _skinsMap[UP];
+			return _skinsMap[UP_SKIN];
 		}
-		public function set $upSkin(value:BitmapSkin):void{
-			_skinsMap[UP]=value;
-		}
+		
 		
 		/**
 		 * 按下皮肤 ，如果没有就使用正常皮肤
@@ -171,15 +329,12 @@ package potato.component
 		 * 
 		 */
 		public function set downSkin(value:BitmapSkin):void{
-			$downSkin=value;
-			if(_state==DOWN)
-				render();
+			_skinsMap[DOWN_SKIN]=value;
+			if(_state==DOWN_SKIN)
+				invalidate(render);
 		}
 		public function get downSkin():BitmapSkin{
-			return _skinsMap[DOWN];
-		}
-		public function set $downSkin(value:BitmapSkin):void{
-			_skinsMap[DOWN]=value;
+			return _skinsMap[DOWN_SKIN];
 		}
 		
 		/**
@@ -188,79 +343,56 @@ package potato.component
 		 * 
 		 */
 		public function set disableSkin(value:BitmapSkin):void{
-			$disableSkin=value;
-			if(_state==DISABLE)
-				render();
+			_skinsMap[DISABLE_SKIN]=value;
+			if(_state==DISABLE_SKIN)
+				invalidate(render);
 		}
 		public function get disableSkin():BitmapSkin{
-			return _skinsMap[DISABLE];
-		}
-		public function set $disableSkin(value:BitmapSkin):void{
-			_skinsMap[DISABLE]=value;
-		}
-		/**
-		 * 选中皮肤，如果没有使用正常皮肤 
-		 * @param value
-		 * 
-		 */
-		public function set selectedSkin(value:BitmapSkin):void{
-			$selectedSkin=value;
-			if(_state==SELECTED)
-				render();
-		}
-		public function get selectedSkin():BitmapSkin{
-			return _skinsMap[SELECTED];
-		}
-		public function set $selectedSkin(value:BitmapSkin):void{
-			_skinsMap[SELECTED]=value;
-		}
-		/**
-		 * 图片文字
-		 * @param value
-		 * 
-		 */
-		public function set textSkin(value:BitmapSkin):void{
-			$textSkin=value;
-			render();
-		}
-		public function get textSkin():BitmapSkin{
-			return _textSkin;
-		}
-		public function set $textSkin(value:BitmapSkin):void{
-			_textSkin=value;
+			return _skinsMap[DISABLE_SKIN];
 		}
 		
 		/**
-		 * 文字中心x偏移 
+		 * 选中正常皮肤
 		 * @param value
 		 * 
 		 */
-		public function set textOffsetX(value:Number):void{
-			$textOffsetX=value;	
-			render();
+		public function set selectedUpSkin(value:BitmapSkin):void{
+			_skinsMap[SELECTED_UP_SKIN]=value;
+			if(_state==SELECTED_UP_SKIN)
+				invalidate(render);
 		}
-		public function get textOffsetX():Number{
-			return _textOffsetX;
-		}
-		public function set $textOffsetX(value:Number):void{
-			_textOffsetX=value;
+		public function get selectedUpSkin():BitmapSkin{
+			return _skinsMap[SELECTED_UP_SKIN];
 		}
 		
 		/**
-		 * 文字中心y偏移 
+		 * 选中按下皮肤
 		 * @param value
 		 * 
 		 */
-		public function set textOffsetY(value:Number):void{
-			$textOffsetY=value;	
-			render();
+		public function set selectedDownSkin(value:BitmapSkin):void{
+			_skinsMap[SELECTED_DOWN_SKIN]=value;
+			if(_state==SELECTED_DOWN_SKIN)
+				invalidate(render);
 		}
-		public function get textOffsetY():Number{
-			return _textOffsetY;
+		public function get selectedDownSkin():BitmapSkin{
+			return _skinsMap[SELECTED_DOWN_SKIN];
 		}
-		public function set $textOffsetY(value:Number):void{
-			_textOffsetY=value;
+		
+		/**
+		 * 选中禁用皮肤 
+		 * @param value
+		 * 
+		 */
+		public function set selectedDisableSkin(value:BitmapSkin):void{
+			_skinsMap[SELECTED_DISABLE_SKIN]=value;
+			if(_state==SELECTED_DISABLE_SKIN)
+				invalidate(render);
 		}
+		public function get selectedDisableSkin():BitmapSkin{
+			return _skinsMap[SELECTED_DISABLE_SKIN];
+		}
+		
 		//-------------------------
 		//	text property
 		//--------------------------
@@ -268,8 +400,7 @@ package potato.component
 		private var _htmlText:String;
 		private var _textFormat:TextFormat;
 		private var _textPadding:Padding;
-		
-		
+		private var _toggleGroup:ToggleGroup;
 		/**
 		 * html文本 
 		 * @return 
@@ -282,12 +413,12 @@ package potato.component
 		
 		public function set htmlText(value:String):void
 		{
-			$htmlText=value;
-			render();
+			if(_htmlText!=value){
+				_htmlText=value;
+				invalidate(render);
+			}
 		}
-		public function set $htmlText(value:String):void{
-			_htmlText=value;
-		}
+
 		/**
 		 * 文本 
 		 * @return 
@@ -300,11 +431,10 @@ package potato.component
 		
 		public function set text(value:String):void
 		{
-			$text=value;
-			render();
-		}
-		public function set $text(value:String):void{
-			_text=value;
+			if(_text!=value){
+				_text=value;
+				invalidate(render);
+			}
 		}
 		
 		/**
@@ -319,12 +449,10 @@ package potato.component
 		
 		public function set textPadding(value:Padding):void
 		{
-			$textPadding = value;
-			render();
-		}
-		public function set $textPadding(value:Padding):void{
 			_textPadding=value;
+			invalidate(render);
 		}
+
 		/**
 		 * 文本样式 
 		 * @return 
@@ -337,56 +465,86 @@ package potato.component
 		
 		public function set textFormat(value:TextFormat):void
 		{
-			$textFormat = value;
-			render();
-		}
-		public function set $textFormat(value:TextFormat):void{
 			_textFormat=value;
+			invalidate(render);
 		}
+
 		/**
 		 * 禁用 
 		 * @param value
 		 * 
 		 */
 		public function set disable(value:Boolean):void{
-			$disable=value;	
-			render();
+			if(_disable!=value){
+				_disable=value;
+				this.mouseEnabled=this.mouseChildren=!_disable;
+				invalidate(render);
+			}
 		}
 		public function get disable():Boolean{
 			return _disable;
 		}
-		public function set $disable(value:Boolean):void{
-			_disable=value;
-			this.mouseEnabled=this.mouseChildren=!_disable;
-			_state=_disable?DISABLE:UP;
-		}
 		
+		/**
+		 * 是否选中 
+		 * @param value
+		 * 
+		 */
 		public function set selected(value:Boolean):void{
-			$selected=value;
-			render();
+			if(_selected!=value){
+				_selected=value;
+				dispatchEvent(new PotatoEvent(PotatoEvent.SELECT_CHANGE));
+				if(_selected && _toggleGroup){
+					_toggleGroup.select(this);
+				}
+				invalidate(render);
+			}
 		}
 		public function get selected():Boolean{
 			return _selected;
 		}
-		public function set $selected(value:Boolean):void{
-			_selected=value;
-			if(!_disable){
-				_state=_selected?SELECTED:UP;
-			}
-		}
 		
+		/**
+		 * 数据 
+		 * @param value
+		 * 
+		 */
 		public function set data(value:Object):void{
 			_data=value;
 		}
 		public function get data():Object{
 			return _data;
 		}
+		
+		/**
+		 * 开关按钮组 
+		 * @return 
+		 * 
+		 */
+		public function get toggleGroup():ToggleGroup
+		{
+			return _toggleGroup;
+		}
+		
+		public function set toggleGroup(value:ToggleGroup):void
+		{
+			if(value==_toggleGroup)
+				return;
+			
+			if(_toggleGroup){
+				_toggleGroup.removeItem(this);
+			}
+			_toggleGroup = value;
+			if(_toggleGroup){
+				_toggleGroup.addItem(this);
+			}
+		}
+
 		//------------------------
 		// assets
 		//------------------------
 		private var _background:Bitmap;
 		private var _textField:TextField;
-		private var _textBitmap:Bitmap;
 		protected function createChildren():void{
 			_background=new Bitmap();
 			this.addChild(_background);
@@ -394,54 +552,47 @@ package potato.component
 		//------------------------
 		// 渲染
 		//------------------------
-		public function render():void{
-			DebugUtil.traceProcessCurrent("render",this);
-			if(!upSkin) return;		//没有弹起皮肤
-//			if(!text && !htmlText && !textSkin) return;	//没有文字并且没有文字图像
+		private function get currentSkin():BitmapSkin{
+			if(!_disable && !_selected && !_isDown){
+				_state=UP_SKIN;
+			}else if(!_disable && !_selected && _isDown){
+				_state=DOWN_SKIN;
+			}else if(!_disable && _selected && !_isDown){
+				_state=SELECTED_UP_SKIN;
+			}else if(!_disable && _selected && _isDown){
+				_state=SELECTED_DOWN_SKIN;
+			}else if(_disable && _selected){
+				_state=SELECTED_DISABLE_SKIN;
+			}else if(_disable && !_selected){
+				_state=DISABLE_SKIN;
+			}
+			
+			return _skinsMap[_state]!=null?_skinsMap[_state]:upSkin;
+		}
+		/**
+		 * 渲染组件内容 
+		 * 
+		 */
+		private function render():void{
+//			trace("__________render1")
+			if(!_background)	return;
 			
 			//背景
-			var skin:BitmapSkin=_skinsMap[_state];
-			if(_state==DISABLE){
-				if(skin){
-					_background.$skin=skin;		//存在禁用皮肤
-					_background.disable=false;
+			_background.skin=currentSkin;		
+			_background.width=_width;
+			_background.height=_height;
+			
+			if(_disable){
+				if(_state==DISABLE_SKIN || _state==SELECTED_DISABLE_SKIN){
+					_background.disable=false;		
 				}else{
-					_background.$skin=_skinsMap[UP]; //不存在禁用皮肤取正常变灰
-					_background.disable=true;
+					_background.disable=true;		
 				}
 			}else{
 				_background.disable=false;
-				_background.$skin=skin?skin:_skinsMap[UP];	//不存在取正常
 			}
-			_background.$width=width;
-			_background.$height=height;
-			_background.render();
 			
-			//组件大小
-			_width=_background.width;
-			_height=_background.height;
-			
-			if(textSkin){		//图片文字
-				if(_textField){		//移除文字
-					this.removeChild(_textField);
-					_textField=null;
-				}
-				if(!_textBitmap){	//创建图片
-					_textBitmap=new Bitmap();
-					this.addChild(_textBitmap);
-				}
-				
-				_textBitmap.$skin=textSkin;
-				_textBitmap.render();
-				
-				//图片偏移
-				_textBitmap.x=(width-_textBitmap.width)/2+(!isNaN(textOffsetX)?textOffsetX:0);
-				_textBitmap.y=(height-_textBitmap.height)/2+(!isNaN(textOffsetY)?textOffsetY:0);
-			}else if(text!=null || htmlText!=null){		//文字
-				if(_textBitmap){		//移除图片
-					this.removeChild(_textBitmap);
-					_textBitmap=null;
-				}
+			if(text!=null || htmlText!=null){		//文字
 				if(!_textField){		//创建文字
 					_textField=new TextField("",2048,2048);
 					this.addChild(_textField);
@@ -478,17 +629,23 @@ package potato.component
 			}
 		}
 		
-		protected function onBegin(e:TouchEvent):void{
-			_state=DOWN;
+		private function onBegin(e:TouchEvent):void{
+			_isDown=true;
+			
 			render();
 		}
-		protected function onEnd(e:TouchEvent):void{
-			_state=_selected?SELECTED:UP;
+		private function onEnd(e:TouchEvent):void{
+			_isDown=false;
 			render();
 		}
 		
+		/**
+		 * 释放资源 
+		 * 
+		 */
 		override public function dispose():void{
 			super.dispose();
+			RenderManager.dispose(this);
 			
 			if(_background){
 				removeChild(_background);
@@ -501,21 +658,21 @@ package potato.component
 				_textField.dispose();
 				_textField=null;
 			}
-			if(_textBitmap){
-				if(_textBitmap.parent)
-					removeChild(_textBitmap);
-				_textBitmap.dispose();
-				_textBitmap=null;
-			}
 			if(_skinsMap){
-				for(var i:uint in _skinsMap){
-					delete _skinsMap[i];
+				for(var i:String in _skinsMap){
+					delete _skinsMap[uint(i)];
 				}
 				_skinsMap=null;
 				_skinsMap=new Dictionary(true);
 			}
+			toggleGroup=null;
+			
 			this.removeEventListener(TouchEvent.TOUCH_BEGIN,onBegin);
+			this.removeEventListener(TouchEvent.MULTI_TOUCH_BEGIN,onBegin);
+			
 			this.removeEventListener(TouchEvent.TOUCH_END,onEnd);
+			this.removeEventListener(TouchEvent.MULTI_TOUCH_END,onEnd);
+			
 		}
 	}
 }

@@ -8,7 +8,26 @@ package potato.gesture
 	import potato.logger.Logger;
 
 	/**
-	 * 捏放手势 
+	 * 缩放开始.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="zoomBegin",type="potato.event.GestureEvent")]
+	/**
+	 * 缩放过程中.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="zoom",type="potato.event.GestureEvent")]
+	/**
+	 * 缩放结束.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="zoomEnd",type="potato.event.GestureEvent")]
+	/**
+	 * 缩放手势.
+	 * <p>两指的距离变化可以认定为有效的缩放</p> 
 	 * @author liuxin
 	 * 
 	 */
@@ -19,25 +38,36 @@ package potato.gesture
 			super(target,bubbles);
 		}
 		private static var log:Logger=Logger.getLog("ZoomGesture");
+		
 		/**
-		 * 锁定方向缩放 
+		 * 锁定方向缩放，当设置为true时，scaleX等于scaleY，依据两指的距离变化。否则scaleX依据横向距离变化，scaleY依据纵向距离变化
 		 */		
 		public var lockAspectRatio:Boolean = true;
 		
 		
-		protected var _touch1:Touch;
-		protected var _touch2:Touch;
-		protected var _transformVector:Point;
-		protected var _initialDistance:Number;
+		private var _touch1:Touch;
+		private var _touch2:Touch;
+		private var _transformVector:Point;
+		private var _initialDistance:Number;
 		
-		protected var _scaleX:Number = 1;
+		private var _scaleX:Number = 1;
+		private var _scaleY:Number = 1;
+		
+		/**
+		 * x轴缩放比
+		 * @return 
+		 * 
+		 */
 		public function get scaleX():Number
 		{
 			return _scaleX;
 		}
 		
-		
-		protected var _scaleY:Number = 1;
+		/**
+		 * y轴缩放比 
+		 * @return 
+		 * 
+		 */
 		public function get scaleY():Number
 		{
 			return _scaleY;
@@ -47,13 +77,14 @@ package potato.gesture
 		override public function set state(value:String):void
 		{
 			super.state=value;
-			if(state==BEGAN)
+			if(state==BEGIN)
 				dispatchEvent(new GestureEvent(GestureEvent.ZOOM_BEGIN));
 			else if(state==CHANGED)
 				this.dispatchEvent(new GestureEvent(GestureEvent.ZOOM));
 			else if(state==ENDED)
 				this.dispatchEvent(new GestureEvent(GestureEvent.ZOOM_END));
 		}
+		
 		/**
 		 * 重写开始处理 
 		 * @param touch
@@ -104,8 +135,8 @@ package potato.gesture
 				}
 				
 				if(state==POSSIBLE)
-					state=BEGAN;
-				else if(state==BEGAN || state==CHANGED)
+					state=BEGIN;
+				else if(state==BEGIN || state==CHANGED)
 					state=CHANGED;
 			}
 		}

@@ -1,14 +1,39 @@
 package potato.gesture
 {
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	
 	import core.display.DisplayObject;
 	import core.display.Stage;
 	
-	import potato.component.IDropTrigger;
-	import potato.event.DropEvent;
+	import potato.event.DragEvent;
 	import potato.event.GestureEvent;
+	import potato.manager.IDropTrigger;
 
+	/**
+	 * 拖动开始.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="dragBegin",type="potato.event.GestureEvent")]
+	/**
+	 * 拖动过程中.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="dragMove",type="potato.event.GestureEvent")]
+	/**
+	 * 拖动结束.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="dragEnd",type="potato.event.GestureEvent")]
+	/**
+	 * 拖动手势.
+	 * <p>同平移手势，并提供拖拽放置对象列表的验证，包含拖拽对象的数据</p> 
+	 * @author liuxin
+	 * 
+	 */
 	public class DragGesture extends Gesture
 	{
 		public function DragGesture(target:DisplayObject,bubbles:Boolean=true)
@@ -21,6 +46,8 @@ package potato.gesture
 		//-------------------
 		protected var _offsetX:Number = 0;
 		protected var _offsetY:Number = 0;
+
+		
 
 		/**
 		 * x的偏移 
@@ -49,8 +76,22 @@ package potato.gesture
 		private var _dragInitiator:DisplayObject;
 		private var _dragImage:DisplayObject;
 		private var _dragSource:Object;
+		private var _dragRectangle:Rectangle;
 		
+		/**
+		 *拖动范围限制 
+		 * @return 
+		 * 
+		 */		
+		public function get dragRectangle():Rectangle
+		{
+			return _dragRectangle;
+		}
 		
+		public function set dragRectangle(value:Rectangle):void
+		{
+			_dragRectangle = value;
+		}
 		/**
 		 * 正在移动 
 		 * @return 
@@ -115,7 +156,7 @@ package potato.gesture
 		override public function set state(value:String):void
 		{
 			super.state=value;
-			if(state==BEGAN)
+			if(state==BEGIN)
 				dispatchEvent(new GestureEvent(GestureEvent.DRAG_BEGIN));
 			else if(state==CHANGED)
 				this.dispatchEvent(new GestureEvent(GestureEvent.DRAG_MOVE));
@@ -149,10 +190,10 @@ package potato.gesture
 		override protected function onTouchMove(touch:Touch):void
 		{
 			super.onTouchMove(touch);
-			if(state==POSSIBLE || state==BEGAN || state ==CHANGED){
+			if(state==POSSIBLE || state==BEGIN || state ==CHANGED){
 				if(state==POSSIBLE)
-					state=BEGAN;
-				else if(state==BEGAN || state==CHANGED)
+					state=BEGIN;
+				else if(state==BEGIN || state==CHANGED)
 					state=CHANGED;
 				
 				updatePanOffset();
@@ -167,12 +208,12 @@ package potato.gesture
 		override protected function onTouchEnd(touch:Touch):void
 		{
 			super.onTouchEnd(touch);
-			if(state==POSSIBLE || state==BEGAN || state ==CHANGED){
+			if(state==POSSIBLE || state==BEGIN || state ==CHANGED){
 				
 				var i:int=0;
 				for each(var trigger:IDropTrigger in _triggers){
-					if(trigger.ignoreBubbles ||(!trigger.ignoreBubbles && i==0))
-						DisplayObject(trigger).dispatchEvent(new DropEvent(DropEvent.DRAG_DROP,this));
+					if(trigger.dropIgnoreAbove ||(!trigger.dropIgnoreAbove && i==0))
+						DisplayObject(trigger).dispatchEvent(new DragEvent(DragEvent.DRAG_DROP,this));
 					i++;
 				}
 				
@@ -202,28 +243,28 @@ package potato.gesture
 			var i:int=0;
 			for each(trigger in _prevTriggers){
 				if(_triggers.indexOf(trigger)<0)		//移除的trigger
-					DisplayObject(trigger).dispatchEvent(new DropEvent(DropEvent.DRAG_EXIT,this));
+					DisplayObject(trigger).dispatchEvent(new DragEvent(DragEvent.DRAG_EXIT,this));
 			}
 			for each(var trigger:IDropTrigger in _triggers){
 				var index:int=_prevTriggers.indexOf(trigger);
 				if(index>-1){
-					if(!trigger.ignoreBubbles){
+					if(!trigger.dropIgnoreAbove){
 						if(index==0){		//靠前
 							if(i==0)
-								DisplayObject(trigger).dispatchEvent(new DropEvent(DropEvent.DRAG_OVER,this));
+								DisplayObject(trigger).dispatchEvent(new DragEvent(DragEvent.DRAG_OVER,this));
 							else
-								DisplayObject(trigger).dispatchEvent(new DropEvent(DropEvent.DRAG_EXIT,this));
+								DisplayObject(trigger).dispatchEvent(new DragEvent(DragEvent.DRAG_EXIT,this));
 						}else{
 							if(i==0)
-								DisplayObject(trigger).dispatchEvent(new DropEvent(DropEvent.DRAG_ENTER,this));
+								DisplayObject(trigger).dispatchEvent(new DragEvent(DragEvent.DRAG_ENTER,this));
 							else
-								DisplayObject(trigger).dispatchEvent(new DropEvent(DropEvent.DRAG_OVER,this));
+								DisplayObject(trigger).dispatchEvent(new DragEvent(DragEvent.DRAG_OVER,this));
 						}
 					}else		
-						DisplayObject(trigger).dispatchEvent(new DropEvent(DropEvent.DRAG_OVER,this));
+						DisplayObject(trigger).dispatchEvent(new DragEvent(DragEvent.DRAG_OVER,this));
 				}else{		//新加入的trigger
-					if(trigger.ignoreBubbles || (!trigger.ignoreBubbles && i==0))
-						DisplayObject(trigger).dispatchEvent(new DropEvent(DropEvent.DRAG_ENTER,this));
+					if(trigger.dropIgnoreAbove || (!trigger.dropIgnoreAbove && i==0))
+						DisplayObject(trigger).dispatchEvent(new DragEvent(DragEvent.DRAG_ENTER,this));
 				}
 				i++;
 			}

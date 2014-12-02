@@ -8,7 +8,13 @@ package potato.utils
 		public function Utils()
 		{
 		}
+		public static var testPVR:Boolean = false;
 		
+		///////////// 配置文件里可用的文件路径常量 ///////////////
+		private static const COMMON:RegExp = /@common/g;			//通用资源的文件夹，会被替换为 common
+		private static const LANGUAGE:RegExp = /@language/g;		//语言地区，会被替换为 -l 参数传入的值
+		private static const RESOURCE:RegExp = /@resource/g;		//资源格式，会被替换为 pvr, dxt, atc, png 中的一个
+
 		public static const PV_DEV:int = 0;
 		public static const PV_WIN:int = 1; //avm
 		public static const PV_IPAD:int = 2; //iPad
@@ -452,6 +458,22 @@ package potato.utils
 				platver = PV_DEV;
 			}
 			return platver;
+		}
+		
+		public static function parsePathInDev(path:String, language:String):String {
+			path = StringUtil.trim(path);
+			var s:String;
+			if (path.indexOf("/") == 0) {
+				s = path.substr(1);
+				s = s.replace(COMMON, "common");
+				s = s.replace(LANGUAGE, language);
+				s = s.replace(RESOURCE, "pc");
+			}
+			else
+			{
+				s = language + "/pc/" + path;
+			}
+			return s;
 		}
 		
 	}

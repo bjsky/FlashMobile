@@ -7,117 +7,78 @@ package potato.component
 	import core.filesystem.File;
 	
 	import potato.component.data.SpriteData;
+	import potato.component.interf.ISprite;
 	import potato.manager.ViewManager;
 	
 	/**
-	 * 视图 
+	 * 视图.
+	 * <p>视图是编辑器生成界面的基本单位。通过设置视图的编辑器数据或编辑器文件路径，可以自动创建该视图的界面。通过侦听UIEvent.VIEW_COMPLETE 事件处理视图加载完成</p>
+	 * <p>视图的精灵映射中存储编辑器中所有命名的显示对象，可以通过getSprite()获取。</p>
+	 * <p>在编辑器中使用自定义运行时类，创建继承自View的自定义类，可以扩展编辑器生成界面的功能，添加事件和逻辑代码。</p> 
 	 * @author liuxin
 	 * 
 	 */
-	public class View extends DisplayObjectContainer 
-		implements ISprite
+	public class View extends BorderContainer
 	{
 		public function View()
 		{
 			super();
 		}
-		//----------------------------
-		//	ISprite
-		//----------------------------
-		protected var _width:Number;
-		protected var _height:Number;
-		protected var _scale:Number;
-		protected var _enable:Boolean=true;
-		
-		
-		/**
-		 * 宽度
-		 * @param value
-		 * 
-		 */
-		public function set width(value:Number):void{
-			_width=value;
-		}
-		override public function get width():Number{
-			return _width;
-		}
-		
-		/**
-		 * 高度 
-		 * @param value
-		 * 
-		 */
-		public function set height(value:Number):void{
-			_height=value;
-		}
-		override public function get height():Number{
-			return _height;
-		}
-		
-		/**
-		 * 缩放 
-		 * @param value
-		 * 
-		 */
-		public function set scale(value:Number):void{
-			_scale=value;
-			scaleX=scaleY=_scale;
-		}
-		public function get scale():Number{
-			return _scale;
-		}
-		
-		/**
-		 * 可用性 
-		 * @param value
-		 * 
-		 */
-		public function set enable(value:Boolean):void{
-			_enable=value;
-		}
-		public function get enable():Boolean{
-			return _enable;
-		}
+
 		//--------------------------
 		//	IView
 		//--------------------------
-		private var _sourceFilePath:String;
+		private var _sourcePath:String;
 		private var _source:SpriteData;
 		private var _spriteMap:Dictionary=new Dictionary();
-		
-		/**
-		 * 精灵数据 文件
-		 * @return 
-		 * 
-		 */
-		public function get sourceFilePath():String
-		{
-			return _sourceFilePath;
-		}
-		
-		public function set sourceFilePath(value:String):void
-		{
-			_sourceFilePath = value;
-			if(_sourceFilePath && File.exists(_sourceFilePath)){
-				ViewManager.loadView(this,_sourceFilePath);
-			}
-		}
-		
 		
 		/**
 		 * 精灵数据 
 		 * @return 
 		 * 
 		 */
-		public function get source():SpriteData
+		public function loadSource(data:SpriteData):void
 		{
-			return _source;
+			_source=data;
+			while(background.numChildren>0){
+				var child:DisplayObject=DisplayObjectContainer(background).removeChildAt(0);
+				child.dispose();
+				child=null;
+			}
+			ViewManager.loadView(_source,this);
 		}
 		
-		public function set source(value:SpriteData):void
+//		private function loadComplete():void{
+//			ViewManager.cascadeSprite(_source,null,this,null,true);
+//		}
+		/**
+		 * 精灵视图 
+		 * @return 
+		 * 
+		 */
+		public function get sourceSprite():DisplayObjectContainer
 		{
-			_source = value;
-			ViewManager.loadSpriteData(this,value);
+			return background;
+		}
+		
+		/**
+		 * 精灵数据文件路径 
+		 * @return 
+		 * 
+		 */		
+		public function get sourcePath():String
+		{
+			return _sourcePath;
+		}
+		
+		public function set sourcePath(value:String):void
+		{
+			if(_sourcePath!=value){
+				_sourcePath = value;
+				ViewManager.registerAlias();
+				if(value)
+					loadSource(SpriteData(File.readByteArray(_sourcePath).readObject()));
+			}
 		}
 
 		/**
@@ -142,6 +103,10 @@ package potato.component
 			return DisplayObject(spriteMap[id]);
 		}
 		
+		/**
+		 * 释放资源 
+		 * 
+		 */
 		override public function dispose():void
 		{
 			super.dispose();
@@ -149,8 +114,57 @@ package potato.component
 				this.removeChildAt(0);
 			}
 		}
-		public function render():void
-		{
+		
+		/**
+		 * 获取测量宽度
+		 * @return 
+		 * 
+		 */
+		override public function get measureWidth():Number{
+			var measured:Number=super.measureWidth;
+			return Math.max(measured,cascadeWidth(background));
+		}
+		
+		private function cascadeWidth(cont:DisplayObjectContainer):Number{
+			if(cont is ISprite){
+				return ISprite(cont).width;
+			}else{
+				var max:Number = 0;
+				for (var i:int = cont.numChildren - 1; i > -1; i--) {
+					var comp:DisplayObject = cont.getChildAt(i);
+					if (comp.visible) {
+						var w:Number=(comp is DisplayObjectContainer)?cascadeWidth(comp as DisplayObjectContainer):comp.width;
+						max = Math.max(comp.x + w*comp.scaleX, max);
+					}
+				}
+				return max;
+			}
+		}
+		
+		/**
+		 * 获取测量高度
+		 * @return 
+		 * 
+		 */
+		override public function get measureHeight():Number{
+			var measured:Number=super.measureHeight;
+			return Math.max(measured,cascadeHeight(background));
+		}
+		
+		private function cascadeHeight(cont:DisplayObjectContainer):Number{
+			if(cont is ISprite){
+				return ISprite(cont).height;
+			}else{
+				var max:Number = 0;
+				for (var i:int = cont.numChildren - 1; i > -1; i--) {
+					var comp:DisplayObject = cont.getChildAt(i);
+					if (comp.visible) {
+						var w:Number=(comp is DisplayObjectContainer)?cascadeHeight(comp as DisplayObjectContainer):comp.height;
+						max = Math.max(comp.y + w*comp.scaleY, max);
+					}
+				}
+				return max;
+			}
 		}
 	}
 }

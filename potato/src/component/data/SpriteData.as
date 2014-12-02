@@ -2,11 +2,10 @@ package potato.component.data
 {
 	import flash.net.registerClassAlias;
 	import flash.utils.Dictionary;
-	
-	import core.display.TextureData;
 
 	/**
-	 * 精灵数据 
+	 * 精灵数据.
+	 * <p>编辑器生成文件的数据格式</p>
 	 * @author liuxin
 	 * 
 	 */
@@ -16,6 +15,7 @@ package potato.component.data
 		{
 		}
 
+		
 		/**
 		 * 注册别名 
 		 * 
@@ -26,23 +26,21 @@ package potato.component.data
 		
 		
 		
-		private var _id:String="";
+		private var _id:String;
 		
 		private var _type:String;
 		
-		public var assetsPath:String="";
+		private var _runtime:String;
 		
-		public var assetsName:String="";
+		private var _assetsUrl:String="";
 		
-		/**
-		 * 特殊处理,由于内部加载的需要,携带ImageAvatar上的纹理数据 
-		 */
-		public var imageTextureData:TextureData;
+		private var _configUrl:String="";
 		
 		private var _properties:Dictionary=new Dictionary();
 		
 		private var _children:Vector.<SpriteData>=new Vector.<SpriteData>();
 		
+		private var _actionList:Vector.<ActionData>=new Vector.<ActionData>();
 		/**
 		 * 精灵id 
 		 * @return 
@@ -72,6 +70,53 @@ package potato.component.data
 		{
 			_type = value;
 		}
+		
+		/**
+		 * 运行时类名 ，默认为视图，可以为继承视图的任意类型
+		 */
+		public function get runtime():String
+		{
+			return _runtime;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function set runtime(value:String):void
+		{
+			_runtime = value;
+		}
+		
+		/**
+		 * 图集配置文件路径 
+		 * @return 
+		 * 
+		 */
+		public function get configUrl():String
+		{
+			return _configUrl;
+		}
+		
+		public function set configUrl(value:String):void
+		{
+			_configUrl = value;
+		}
+		
+		/**
+		 * 图集资源文件路径 
+		 * @return 
+		 * 
+		 */
+		public function get assetsUrl():String
+		{
+			return _assetsUrl;
+		}
+		
+		public function set assetsUrl(value:String):void
+		{
+			_assetsUrl = value;
+		}
+		
 		/**
 		 * 属性字典
 		 * @return 
@@ -101,5 +146,21 @@ package potato.component.data
 		{
 			_children = value;
 		}
+		
+		/**
+		 * 动作列表 
+		 * @return 
+		 * 
+		 */
+		public function get actionList():Vector.<ActionData>
+		{
+			return _actionList;
+		}
+		
+		public function set actionList(value:Vector.<ActionData>):void
+		{
+			_actionList = value;
+		}
+		
 	}
 }

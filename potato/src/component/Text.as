@@ -6,19 +6,32 @@ package potato.component
 	import potato.component.data.BitmapSkin;
 	import potato.component.data.Padding;
 	import potato.component.data.TextFormat;
-	import potato.utils.DebugUtil;
+	import potato.component.interf.IDataBinding;
+	import potato.component.interf.ISprite;
+	import potato.manager.RenderManager;
 	import potato.utils.Size;
 	
 	/**
-	 * 文字 
-	 * <br />带背景的文字块。如果设置了组件大小，则文字内容大小由组件大小和填充计算，如果文字内容超出计算的大小则显示不全；
-	 * 如果不设置组件大小，则组件大小由文字内容大小加上填充计算，组件的大小依据内容。
+	 * 文字.
+	 * <p>带背景的文字，可以设置文字的HtmlText</p>
+	 * <p>如果设置了组件大小，则文字内容大小由组件大小和填充计算，如果文字内容超出计算的大小则显示不全。
+	 * 否则组件大小由文字内容大小加上填充计算，组件的大小依据内容</p>
 	 * @author liuxin
 	 * @date 2014.5.30
 	 */
 	public class Text extends DisplayObjectContainer
-		implements ISprite
+		implements ISprite,IDataBinding
 	{
+		/**
+		 * 创建文本
+		 * @param text 文本
+		 * @param skin 背景皮肤
+		 * @param width	宽
+		 * @param height 高
+		 * @param textformat 文字样式
+		 * @param textPadding	文字填充
+		 * 
+		 */
 		public function Text(text:String="",skin:BitmapSkin=null
 							 ,width:Number=NaN,height:Number=NaN,textformat:TextFormat=null,textPadding:Padding=null)
 		{
@@ -26,14 +39,12 @@ package potato.component
 			
 			createChildren();
 			
-			$text=text;
-			$skin=skin;
-			$textFormat=textformat;
-			$textPadding=textPadding;
-			$width=width;
-			$height=height;
-			
-			render();
+			this.text=text;
+			this.skin=skin;
+			this.width=width;
+			this.height=height;
+			this.textFormat=textformat;
+			this.textPadding=textPadding;
 		}
 		
 		
@@ -73,14 +84,73 @@ package potato.component
 			_textField=new TextField("",2048,2048);
 			addChild(_textField);
 		}
+		
 		//----------------------------
 		//	ISprite
 		//----------------------------
-		private var _measureWidth:Number=0;
-		private var _measureHeight:Number=0;
-		protected var _width:Number;
-		protected var _height:Number;
-		protected var _scale:Number;
+		private var _width:Number;
+		private var _height:Number;
+		private var _scale:Number;
+		private var _validateMode:uint=RenderManager.CALLLATER;
+		private var _dataProvider:Object;
+		
+		/**
+		 * 数据绑定 
+		 * @return 
+		 * 
+		 */
+		public function get dataProvider():Object
+		{
+			return _dataProvider;
+		}
+		
+		public function set dataProvider(value:Object):void
+		{
+			_dataProvider = value;
+			for (var prop:String in _dataProvider) {
+				if (hasOwnProperty(prop)) {
+					if(this[prop] is IDataBinding)
+						IDataBinding(this[prop]).dataProvider=_dataProvider[prop];
+					else
+						this[prop] = _dataProvider[prop];
+				}
+			}
+		}
+		
+		
+		/**
+		 * 渲染模式
+		 * @return 
+		 * 
+		 */
+		public function get validateMode():uint
+		{
+			return _validateMode;
+		}
+		
+		public function set validateMode(value:uint):void
+		{
+			_validateMode = value;
+			RenderManager.validateNow(this);
+		}
+		
+		/**
+		 * 组件失效
+		 * @param method
+		 * @param args
+		 * 
+		 */
+		public function invalidate(method:Function, args:Array = null):void{
+			RenderManager.invalidateProperty(this,method,args);
+		}
+		
+		/**
+		 * 验证
+		 * 
+		 */
+		public function validate():void{
+			render();
+		}
 		
 		/**
 		 * 宽度
@@ -88,36 +158,42 @@ package potato.component
 		 * 
 		 */
 		public function set width(value:Number):void{
-			$width=value;
-			render();
+			if(_width!=value){
+				_width=value;
+				_textField.setSize(2048,2048);
+				invalidate(render);
+			}
 		}
 		override public function get width():Number{
-			if(isNaN(_width))
-				return _measureWidth;
-			else
+			if(!isNaN(_width))
 				return _width;
+			else{
+				var paddingWidth:Number=textPadding?textPadding.paddingLeft+textPadding.paddingRight:0;
+				return _textField.textWidth!=0?_textField.textWidth+4+paddingWidth:paddingWidth;
+			}
 		}
-		public function set $width(value:Number):void{
-			_width=value;
-		}
+		
 		/**
 		 * 高度 
 		 * @param value
 		 * 
 		 */
 		public function set height(value:Number):void{
-			$height=value;
-			render();
+			if(_height!=value){
+				_height=value;
+				_textField.setSize(2048,2048);
+				invalidate(render);
+			}
 		}
 		override public function get height():Number{
-			if(isNaN(_height))
-				return _measureHeight;
-			else
+			if(!isNaN(_height))
 				return _height;
+			else{
+				var paddingHeight:Number=textPadding?textPadding.paddingTop+textPadding.paddingBottom:0;
+				return _textField.textHeight!=0?_textField.textHeight+4+paddingHeight:paddingHeight;
+			}
 		}
-		public function set $height(value:Number):void{
-			_height=value;
-		}
+		
 		/**
 		 * 缩放 
 		 * @param value
@@ -151,11 +227,12 @@ package potato.component
 		
 		public function set htmlText(value:String):void
 		{
-			$htmlText=value;
-			render();
-		}
-		public function set $htmlText(value:String):void{
-			_htmlText=value;
+			if(_htmlText!=value){
+				_htmlText=value;
+				_textField.setSize(2048,2048);
+				_textField.htmlText=_htmlText;
+				invalidate(render);
+			}
 		}
 		
 		/**
@@ -170,12 +247,15 @@ package potato.component
 		
 		public function set text(value:String):void
 		{
-			$text=value;
-			render();
+			if(_text!=value){
+				_text=value;
+				_textField.setSize(2048,2048);
+				_textField.text=text;
+				_textField.htmlText=null;
+				invalidate(render);
+			}
 		}
-		public function set $text(value:String):void{
-			_text=value;
-		}
+		
 		/**
 		 * 背景图片 
 		 * @return 
@@ -188,12 +268,10 @@ package potato.component
 		
 		public function set skin(value:BitmapSkin):void
 		{
-			$skin = value;
-			render();
-		}
-		public function set $skin(value:BitmapSkin):void{
 			_skin=value;
+			invalidate(render);
 		}
+		
 		/**
 		 * 文字填充
 		 * @return 
@@ -206,12 +284,10 @@ package potato.component
 		
 		public function set textPadding(value:Padding):void
 		{
-			$textPadding = value;
-			render();
-		}
-		public function set $textPadding(value:Padding):void{
 			_textPadding=value;
+			invalidate(render);
 		}
+		
 		/**
 		 * 文本样式 
 		 * @return 
@@ -224,34 +300,9 @@ package potato.component
 		
 		public function set textFormat(value:TextFormat):void
 		{
-			$textFormat = value;
-			render();
-		}
-		public function set $textFormat(value:TextFormat):void{
 			_textFormat=value;
-		}
-		//------------------------
-		// 渲染
-		//------------------------
-		
-		public function render():void{
-			DebugUtil.traceProcessCurrent("render",this);
-			_textField.setSize(2048,2048);
-			//文字内容
-			if(htmlText)
-				_textField.htmlText=htmlText;
-			else{
-				_textField.text=text;
-				_textField.htmlText=null;
-				if(!text){
-					_textField.setSize(0,0);
-					_measureHeight=_measureWidth=0;
-					return;
-				}
-			}
-			
 			//文字样式
-			if(textFormat){
+			if(_textField && textFormat){
 				_textField.fontName=textFormat.font;
 				_textField.fontSize=textFormat.size;
 				_textField.textColor=textFormat.color;
@@ -259,25 +310,25 @@ package potato.component
 				_textField.hAlign=textFormat.hAlign;
 				_textField.vAlign=textFormat.vAlign;
 			}
+			invalidate(render);
+		}
+		
+		//------------------------
+		// 渲染
+		//------------------------
+		
+		/**
+		 * 渲染组件内容 
+		 * 
+		 */
+		private function render():void{
+			if(!_textField)
+				return;
 			
 			//文字大小
-			var textWidth:Number=0,textHeight:Number=0;
-			if(!isNaN(_width))	//有指定宽，获取文字宽
-				textWidth=textPadding?width-textPadding.paddingLeft-textPadding.paddingRight:width;
-			else{	//没有指定宽，设置显示的宽
-				_measureWidth=textWidth=_textField.textWidth+4;
-				if(textPadding)
-					_measureWidth=textWidth+textPadding.paddingLeft+textPadding.paddingRight;
-			}
-			if(!isNaN(_height))
-				textHeight=textPadding?height-textPadding.paddingTop-textPadding.paddingBottom:height;
-			else{
-				_measureHeight=textHeight=_textField.textHeight+4;
-				if(textPadding)
-					_measureHeight=textHeight+textPadding.paddingTop+textPadding.paddingBottom;
-			}
-			_textField.setSize(textWidth,textHeight);
-			
+			var textWidth:Number=textPadding?width-textPadding.paddingLeft-textPadding.paddingRight:width;
+			var textHeight:Number=textPadding?height-textPadding.paddingTop-textPadding.paddingBottom:height;
+			_textField.setSize(textWidth<=0?1:textWidth,textHeight<=0?1:textHeight);
 			//文字偏移位置
 			_textField.x=textPadding?textPadding.paddingLeft:0;
 			_textField.y=textPadding?textPadding.paddingTop:0;
@@ -288,10 +339,9 @@ package potato.component
 					_background=new Bitmap(skin,width,height);
 					addChildAt(_background,0);
 				}else{
-					_background.$width=width;
-					_background.$height=height;
-					_background.$skin=skin;
-					_background.render();
+					_background.width=width;
+					_background.height=height;
+					_background.skin=skin;
 				}
 			}else{
 				if(_background){
@@ -302,8 +352,13 @@ package potato.component
 			}
 		}
 		
+		/**
+		 * 释放资源 
+		 * 
+		 */
 		override public function dispose():void{
 			super.dispose();
+			RenderManager.dispose(this);
 			
 			if(_background){
 				if(_background.parent)

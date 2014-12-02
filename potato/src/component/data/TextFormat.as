@@ -6,12 +6,23 @@ package potato.component.data
 	import core.text.TextField;
 
 	/**
-	 * 文本样式 
+	 * 文本样式.
+	 * <p>使用文本样式设置包括字体、字号、文字颜色、水平居中、垂直居中和文字滤镜等内容 </p>
 	 * @author liuxin
 	 * 
 	 */
 	public class TextFormat
 	{
+		/**
+		 * 创建文字样式
+		 * @param font 字体
+		 * @param size 字号
+		 * @param color 颜色
+		 * @param hAlign 水平居中
+		 * @param vAlign 垂直居中
+		 * @param filter 滤镜
+		 * 
+		 */
 		public function TextFormat(font:String="",size:Number=12,color:uint=0x0
 										  ,hAlign:uint=TextField.ALIGN_CENTER,vAlign:uint=TextField.ALIGN_CENTER,filter:Filter=null)
 		{
@@ -25,6 +36,7 @@ package potato.component.data
 			this.vAlign=vAlign;
 			this.filter=filter;
 		}
+		
 		/**
 		 * 注册别名 
 		 * 
@@ -32,26 +44,6 @@ package potato.component.data
 		static public function registerAlias():void{
 			registerClassAlias("potato.component.data.TextFormat",TextFormat);
 		}
-//		/**
-//		 * 创建一个文本样式 
-//		 * @param font	字体
-//		 * @param size	字号
-//		 * @param color	颜色
-//		 * @param filter	滤镜
-//		 * @return 
-//		 * 
-//		 */
-//		static public function create(font:String="Verdana",size:Number=12,color:uint=0x0
-//									  ,hAlign:uint=TextField.ALIGN_CENTER,vAlign:uint=TextField.ALIGN_CENTER,filter:Filter=null):TextFormat{
-//			var format:TextFormat=new TextFormat();
-//			format.font=font;
-//			format.size=size;
-//			format.color=color;
-//			format.hAlign=hAlign;
-//			format.vAlign=vAlign;
-//			format.filter=filter;
-//			return format;
-//		}
 		
 		private var _font:String;
 		private var _size:Number;
@@ -130,21 +122,6 @@ package potato.component.data
 		}
 		public function get vAlign():uint{
 			return _vAlign;
-		}
-		
-		
-		/**
-		 * 应用文字样式 
-		 * @param field
-		 * 
-		 */
-		public function apply(field:TextField):void{
-			field.fontName=font;
-			field.fontSize=size;
-			field.textColor=color;
-			field.filter=filter;
-			field.hAlign=hAlign;
-			field.vAlign=vAlign;
 		}
 	}
 }

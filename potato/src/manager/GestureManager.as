@@ -14,7 +14,8 @@ package potato.manager
 	import potato.logger.Logger;
 
 	/**
-	 * 手势管理器 
+	 * 手势管理器.
+	 * <p>管理系统中所有手势的触发，冒泡等行为。</p> 
 	 * @author liuxin
 	 * 
 	 */
@@ -25,7 +26,7 @@ package potato.manager
 		}
 		use namespace potato_internal;
 		/**
-		 * 显示对象的手势映射 map[display]=Vector.<IGesture>,只判断重复手势，减少干预
+		 * 显示对象的手势映射，每个显示对象可以包含多个手势
 		 */
 		static private var _displayobjectGestureMap:Dictionary=new Dictionary();
 		/**
@@ -46,7 +47,17 @@ package potato.manager
 		static private var END:uint=4;
 		
 		
+		/**
+		 * logger 
+		 */
 		static private var _log:Logger=Logger.getLog("GestureManager")
+			
+			
+		/**
+		 * 添加一个手势 
+		 * @param gesture
+		 * 
+		 */
 		static potato_internal function addGesture(gesture:Gesture):void{
 			if(!gesture.target) return;
 			var gesutres:Array;
@@ -67,6 +78,11 @@ package potato.manager
 			_displayobjectGestureMap[gesture.target]=gesutres;
 		}
 		
+		/**
+		 * 移除一个手势 
+		 * @param gesture
+		 * 
+		 */
 		static potato_internal function removeGesture(gesture:Gesture):void{
 			if(!gesture.target) return;
 			var gestures:Array=_displayobjectGestureMap[gesture.target];
@@ -86,6 +102,11 @@ package potato.manager
 		}
 		
 		
+		/**
+		 * 触摸事件处理 
+		 * @param e
+		 * 
+		 */
 		static private function touchHandler(e:TouchEvent):void{
 //			_log.debug("[Begin]currentTarget:"+getQualifiedClassName(e.currentTarget)+",target:"+getQualifiedClassName(e.target)
 //				+",touchId:"+e.touchPointID+",lx:"+e.localX+",ly:"+e.localY);
@@ -98,10 +119,10 @@ package potato.manager
 			var type:uint;
 			if (e.type == TouchEvent.TOUCH_BEGIN || e.type == TouchEvent.MULTI_TOUCH_BEGIN) {
 				type=BEGIN;
-				
 				//创建touch
 				touch=new Touch(touchID);
-				touch.target=e.currentTarget as DisplayObject;
+				touch.target=e.target as DisplayObject;
+				touch.touchTarget=e.currentTarget as DisplayObject;
 				touch.setLocation(e.stageX,e.stageY,getTimer(),e.target);
 				_touchesMap[touchID]=touch;
 				
@@ -124,12 +145,26 @@ package potato.manager
 			bubblesChains(touch,touch.target,type);
 		}
 		
+		/**
+		 * 阻止原生触摸事件，包装系统触摸事件冒泡
+		 * @param e
+		 * 
+		 */
 		static private function stopEvent(e:TouchEvent):void {
 			var event:Event = new SystemTouchEvent(e.type, e.bubbles, e.localX, e.localY, e.touchPointID);
 			e.stopPropagation();
-			e.currentTarget.dispatchEvent(event);
+			if(e.currentTarget is DisplayObject && DisplayObject(e.currentTarget).parent)
+				DisplayObject(e.currentTarget).parent.dispatchEvent(event);
 		}
 		
+		/**
+		 * 冒泡对象链 
+		 * @param touch
+		 * @param current
+		 * @param type
+		 * @param bubbles
+		 * 
+		 */
 		static private function bubblesChains(touch:Touch,current:DisplayObject,type:uint,bubbles:Boolean=true):void{
 			//跟踪对象为触摸的对象时使用初始值，否则使用跟踪的冒泡值
 			bubbles=(current==touch.target)?true:bubbles;

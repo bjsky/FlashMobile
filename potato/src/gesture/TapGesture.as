@@ -8,9 +8,16 @@ package potato.gesture
 	import core.display.Stage;
 	
 	import potato.event.GestureEvent;
-
+	
 	/**
-	 * 点击手势 
+	 * 点击事件.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="tap",type="potato.event.GestureEvent")]
+	/**
+	 * 点击手势.
+	 * <p>一定时间内指定范围的按下抬起被认定为有效的点击</p> 
 	 * @author liuxin
 	 * 
 	 */
@@ -22,7 +29,6 @@ package potato.gesture
 			this.maxOffset=maxOffset;
 			this.maxTapDelay=maxDelay;
 		}
-		
 		/**
 		 * 允许的最大偏移,为NaN表示在对象上
 		 */
@@ -34,7 +40,6 @@ package potato.gesture
 		public var maxTapDelay:uint = 400;
 		
 		private var begin:Number;
-		
 		override public function set state(value:String):void
 		{
 			super.state=value;

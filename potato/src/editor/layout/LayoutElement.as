@@ -2,26 +2,32 @@ package potato.editor.layout
 {
 	import flash.net.registerClassAlias;
 	
-	import core.display.DisplayObject;
-	import core.display.DisplayObjectContainer;
+	import core.events.EventDispatcher;
 	
 	import potato.potato_internal;
-	import potato.component.ISprite;
+	import potato.component.interf.ISprite;
+	import potato.manager.LayoutManager;
+	import potato.manager.RenderManager;
 
 	/**
-	 * 布局元素 
+	 * 布局元素.
+	 * <p>布局元素是组件的布局包装器，封装诸如x,y,width,height,left,right,top,bottom,centerX,centerY等布局属性，当布局属性发生改变时会派发相应的LayoutEvent</p>
+	 * <p>布局作为独立的控制元件，不和组件绑定。创建组件的布局请将组件作为布局的参数，利用add方法为布局添加子布局或组件创建级联布局。更新布局需要调用布局的update方法</p>
 	 * @author liuxin
-	 * 
+	 * @see LayoutEvent
 	 */
-	public class LayoutElement 
+	public class LayoutElement extends EventDispatcher 
 	{
 		public function LayoutElement(ui:ISprite,belong:Layout=null)
 		{
 			this.ui=ui;
 			this.belong=belong;
+			LayoutManager.add(this);
 		}
 		
 		use namespace potato_internal;
+
+		
 		/**
 		 * 注册别名 
 		 * 
@@ -30,28 +36,12 @@ package potato.editor.layout
 			registerClassAlias("potato.layout.LayoutElement",LayoutElement);
 		}		
 		
-		
-//		/**
-//		 * 创建一个layoutElement
-//		 * @param ui 
-//		 * @param layout
-//		 * @return 
-//		 * 
-//		 */
-//		static public function create(ui:ISprite,belong:Layout=null):LayoutElement{
-//			var le:LayoutElement=new LayoutElement();
-//			le.ui=ui;
-//			le.belong=belong;
-//			return le;
-//		}
 		//---------------------------------
 		// 	properties
 		//---------------------------------
 		private var _ui:ISprite;
 		private var _belong:Layout;
 		
-		private var _x:Number;
-		private var _y:Number;
 		private var _width:Number;
 		private var _height:Number;
 		
@@ -62,32 +52,24 @@ package potato.editor.layout
 		private var _centerX:Number;
 		private var _centerY:Number;
 		
-		
 		/**
 		 * 包含的ui 
 		 * @param value
-		 * 
+		 * @private
 		 */
 		public function set ui(value:ISprite):void{
 			_ui=value;
-			if(_ui)
-			{
-				_x=_ui.x;
-				_y=_ui.y;
-				if(!isNaN(ui.width))
-					_width=ui.width;
-				if(!isNaN(ui.height))
-					_height=ui.height;
-			}
 		}
+		
 		public function get ui():ISprite{
 			return _ui;
 		}
 		
+	
 		/**
 		 * 从属的layout 
 		 * @param value
-		 * 
+		 * @private 
 		 */
 		public function set belong(value:Layout):void{
 			_belong=value;
@@ -102,12 +84,10 @@ package potato.editor.layout
 		 * 
 		 */
 		public function set x(value:Number):void{
-			_x=value;
-			if(ui.x!=_x)
-				ui.x=_x;
+			ui.x=value;
 		}
 		public function get x():Number{
-			return _x;
+			return ui.x;
 		}
 		
 		/**
@@ -116,64 +96,48 @@ package potato.editor.layout
 		 * 
 		 */
 		public function set y(value:Number):void{
-			_y=value;
-			if(ui.y!=_y)
-				ui.y=_y;
+			ui.y=value;
 		}
 		public function get y():Number{
-			return _y;
+			return ui.y;
 		}
+		
 		
 		/**
-		 * 布局宽 
-		 * @param value
+		 * y缩放 
+		 * @return 
 		 * 
 		 */
-		public function set width(value:Number):void{
-			_width=value;
-			if(_width!=ui.width){
-				ui.width=_width;
-			}
-		}
-		public function get width():Number{
-			if(isNaN(_width)){
-				if(!_measuredWidth){		//失效重新计算宽
-					_widthMeasured=measureWidth();
-					_measuredWidth=true;
-				}
-				return	_widthMeasured;		//返回计算宽
-			}else
-				return _width;
+		public function get scaleY():Number
+		{
+			return ui.scaleY;
 		}
 		
+		public function set scaleY(value:Number):void
+		{
+			ui.scaleY=value;
+		}
+		
+		public function get scaledHeight():Number{
+			return height*scaleY;
+		}
 		/**
-		 *  布局高 
-		 * @param value
+		 * x缩放 
+		 * @return 
 		 * 
 		 */
-		public function set height(value:Number):void{
-			_height=value;
-			if(_height!=ui.height){
-				ui.height=_height;
-			}
-		}
-		public function get height():Number{
-			if(isNaN(_height)){
-				if(!_measuredHeight){	//失效重新计算高
-					_heightMeasured=measureHeight();
-					_measuredHeight=true;
-				}
-				return	_heightMeasured;	//返回计算高
-			}else
-				return _height;
+		public function get scaleX():Number
+		{
+			return ui.scaleX;
 		}
 		
-		public function get scaleWidth():Number{
-			return width*ui.scaleX;
+		public function set scaleX(value:Number):void
+		{
+			ui.scaleX=ui.scaleX;
 		}
 		
-		public function get scaleHeight():Number{
-			return height*ui.scaleY;
+		public function get scaledWidth():Number{
+			return width*scaleX;
 		}
 		
 		/**
@@ -182,11 +146,15 @@ package potato.editor.layout
 		 * 
 		 */
 		public function set left(value:Number):void{
-			_left=value;
+			if(_left!=value){
+				_left=value;
+				invalidate();
+			}
 		}
 		public function get left():Number{
 			return _left;
 		}
+		
 		
 		/**
 		 * 锚定右边距  
@@ -194,19 +162,26 @@ package potato.editor.layout
 		 * 
 		 */
 		public function set right(value:Number):void{
-			_right=value;
+			if(_right!=value){
+				_right=value;
+				invalidate();
+			}
 		}
 		public function get right():Number{
 			return _right;
 		}
 		
+
 		/**
 		 * 锚定上边距 
 		 * @param value
 		 * 
 		 */
 		public function set top(value:Number):void{
-			_top=value;
+			if(_top!=value){
+				_top=value;
+				invalidate();
+			}
 		}
 		public function get top():Number{
 			return _top;
@@ -218,7 +193,10 @@ package potato.editor.layout
 		 * 
 		 */
 		public function set bottom(value:Number):void{
-			_bottom=value;
+			if(_bottom!=value){
+				_bottom=value;
+				invalidate();
+			}
 		}
 		public function get bottom():Number{
 			return _bottom;
@@ -230,89 +208,133 @@ package potato.editor.layout
 		 * 
 		 */
 		public function set centerX(value:Number):void{
-			_centerX=value;
+			if(_centerX!=value){
+				_centerX=value;
+				invalidate();
+			}
 		}
 		public function get centerX():Number{
 			return _centerX;
 		}
 		
+
 		/**
 		 * 锚定居中y偏移  
 		 * @param value
 		 * 
 		 */
 		public function set centerY(value:Number):void{
-			_centerY=value;
+			if(_centerY!=value){
+				_centerY=value;
+				invalidate();
+			}
 		}
 		public function get centerY():Number{
 			return _centerY;
 		}
 		
+		/**
+		 * 布局宽 
+		 * @param value
+		 * 
+		 */
+		public function set width(value:Number):void{
+			if(_width!=value){
+				_width=value;
+				ui.width=_width;
+				this.dispatchEvent(new LayoutEvent(LayoutEvent.RESIZE));
+			}
+		}
+		public function get width():Number{
+			if(!isNaN(_width))
+				return _width;
+			else
+				return measureWidth;
+		}
+		
+		protected function get measureWidth():Number{
+			return ui.width;
+		}
+		
+		potato_internal function get explicitWidth():Number{
+			return _width;
+		}
+		/**
+		 *  布局高 
+		 * @param value
+		 * 
+		 */
+		public function set height(value:Number):void{
+			if(_height!=value){
+				_height=value;
+				ui.height=_height;
+				this.dispatchEvent(new LayoutEvent(LayoutEvent.RESIZE));
+			}
+		}
+		public function get height():Number{
+			if(!isNaN(_height))
+				return _height;
+			else
+				return measureHeight;
+		}
+		
+		protected function get measureHeight():Number{
+			return ui.height;
+		}
+		
+		potato_internal function get explicitHeight():Number{
+			return _height;
+		}
 		//-------------------
 		//	function
 		//-------------------
 		/**
-		 * 刷新布局 
+		 * 布局 
 		 * 
 		 */
-		public function refreshLayout():void{
+		potato_internal function update():void{
 			if(belong)	//如果有布局，由布局刷新，最终由根布局刷新
-				belong.refreshLayout();
-			else	//否则计算布局
-				measureLayout();
+				belong.update();
+			else{	//否则计算布局
+//				trace("_______layout:"+StringUtil.getMemoryName(this));
+				RenderManager.callLater(this,measure);
+			}
 		}
 		
-		private var _measuredWidth:Boolean=false;
-		private var _widthMeasured:Number;
-		private var _measuredHeight:Boolean=false;
-		private var _heightMeasured:Number;
-		potato_internal function measureLayout():void{
-			//计算的宽高失效
-			_measuredWidth=false;
-			_measuredHeight=false;
+		private var _isValidate:Boolean=false;
+		public function get isValidate():Boolean{
+			return _isValidate;
+		}
+		potato_internal function invalidate():void{
+			if(_isValidate){
+				_isValidate=false;
+			}
+		}
+		potato_internal function validate():void{
+			if(!_isValidate){
+				_isValidate=true;
+				
+				update();
+			}
 		}
 		
 		/**
-		 * 计算测量宽 
-		 * @return 
+		 * @private 
 		 * 
 		 */
-		public function measureWidth():Number{
-			var max:Number = 0;
-			if(ui is DisplayObjectContainer){
-				var cont:DisplayObjectContainer=DisplayObjectContainer(ui);
-				for (var i:int = cont.numChildren - 1; i > -1; i--) {
-					var comp:DisplayObject = cont.getChildAt(i);
-					if (comp.visible) {
-						if(!isNaN(comp.width))
-							max = Math.max(comp.x + comp.width*comp.scaleX, max);
-					}
-				}
-			}
-			return max;
+		public function measure():void{
+			measureLayout();
+			this.dispatchEvent(new LayoutEvent(LayoutEvent.MEASURE));
 		}
-		/**
-		 * 计算测量高 
-		 * @return 
-		 * 
-		 */
-		
-		public function measureHeight():Number{
-			var max:Number = 0;
-			if(ui is DisplayObjectContainer){
-				var cont:DisplayObjectContainer=DisplayObjectContainer(ui);
-				for (var i:int = cont.numChildren - 1; i > -1; i--) {
-					var comp:DisplayObject = cont.getChildAt(i);
-					if (comp.visible ) {
-						if(	!isNaN(comp.height))
-							max = Math.max(comp.y + comp.height*comp.scaleX, max);
-					}
-				}
-			}
-			return max;
+		protected function measureLayout():void{
+			
 		}
 		
-		public function dispose():void{
+		override public function dispose():void{
+			super.dispose();
+			RenderManager.dispose(this);
+			
+			LayoutManager.remove(this);
 			this.ui=null;
 			this.belong=null;
 		}

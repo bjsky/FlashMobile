@@ -3,20 +3,22 @@ package potato.editor.layout
 	import flash.net.registerClassAlias;
 	import flash.utils.Dictionary;
 	
-	import potato.component.ISprite;
+	import potato.potato_internal;
+	import potato.component.interf.ISprite;
 
 	/**
-	 * 布局
+	 * 布局容器.
+	 * <p>布局容器是可以管理布局元素的容器元件，通过add、remove方法管理布局元素。布局元素没有先后顺序，通过getElement可以获取子组件的布局元素</p>
 	 * @author liuxin
 	 * 
 	 */
 	public class Layout extends LayoutElement
 	{
+		use namespace potato_internal;
+
 		/**
 		 *  
 		 * @param ui 被布局的uicomponent对象
-		 * @param width 	设定的布局宽
-		 * @param height	设定的布局高
 		 * 
 		 */
 		public function Layout(ui:ISprite)
@@ -26,43 +28,20 @@ package potato.editor.layout
 		static public function registerAlias():void{
 			registerClassAlias("potato.layout.Layout",Layout);
 		}
-//		static public function create(ui:ISprite,belong:Layout=null):Layout{
-//			var l:Layout=new Layout();
-//			l.ui=ui;
-//			return l;
-//		}
-//		
+
 		override public function set ui(value:ISprite):void
 		{
 			super.ui=value;
 		}
 		
-		protected var _childrenDic:Dictionary=new Dictionary();
+		protected var _childrenMap:Dictionary=new Dictionary();
 		protected var _childrenElements:Vector.<LayoutElement>=new Vector.<LayoutElement>();
 		
-		/**
-		 * 子ui字典 （）
-		 */
-		public function set childrenDic(value:Dictionary):void{
-			_childrenDic=value;	
-		}
-		public function get childrenDic():Dictionary{
-			return _childrenDic;
-		}
-		/**
-		 * 子元素字典（元素或布局） 
-		 */
-		public function set childrenElements(elements:Vector.<LayoutElement>):void{
-			_childrenElements=elements;
-		}
-		public function get childrenElements():Vector.<LayoutElement>{
-			return _childrenElements;
-		}
 		
 		/**
-		 * 添加一个ui或布局（继承IlayoutElement接口） 
-		 * @param obj	添加的ui或布局
-		 * @return 布局
+		 * 添加一个ui或布局元素
+		 * @param obj	添加的ui或布局元素
+		 * @return 该ui的布局元素或添加的布局元素
 		 * 
 		 */
 		public function add(obj:Object):LayoutElement{
@@ -73,10 +52,10 @@ package potato.editor.layout
 				
 				el = new LayoutElement(ui,this);
 				//有先移除
-				if(_childrenDic[ui]){
-					_childrenElements.splice(_childrenElements.indexOf(_childrenDic[ui]),1,el);
+				if(_childrenMap[ui]){
+					_childrenElements.splice(_childrenElements.indexOf(_childrenMap[ui]),1,el);
 				}else{
-					_childrenDic[ui] = el;
+					_childrenMap[ui] = el;
 					_childrenElements.push(el);
 				}
 				return el;
@@ -84,22 +63,21 @@ package potato.editor.layout
 				el=LayoutElement(obj);
 				
 				//有先移除
-				if (_childrenDic[el.ui]){
-					_childrenElements.splice(_childrenElements.indexOf(_childrenDic[el.ui]),1,el);
+				if (_childrenMap[el.ui]){
+					_childrenElements.splice(_childrenElements.indexOf(_childrenMap[el.ui]),1,el);
 				}else{
 					el.belong=this;
-					_childrenDic[el.ui] = el;
+					_childrenMap[el.ui] = el;
 					_childrenElements.push(el);
 				}
 				return el;
-				
 			}else
 				return null;
 		}
 		
 		/**
-		 * 移除一个ui或布局
-		 * @param obj 待移除的ui或布局
+		 * 移除一个ui或布局元素
+		 * @param obj 移除的ui或布局元素
 		 * 
 		 */
 		public function remove(obj:Object):void {
@@ -107,11 +85,11 @@ package potato.editor.layout
 			var el:LayoutElement;
 			if(obj is ISprite){
 				ui=ISprite(obj);
-				el=_childrenDic[ui];
+				el=_childrenMap[ui];
 				
 			}else if(obj is LayoutElement){
 				ui=LayoutElement(obj).ui;
-				el=_childrenDic[ui];
+				el=_childrenMap[ui];
 			}
 			
 			if (el) {
@@ -125,12 +103,12 @@ package potato.editor.layout
 				}
 				el.dispose();
 				el = null;
-				delete _childrenDic[ui];
+				delete _childrenMap[ui];
 			}
 		}
 		
 		/**
-		 * 获取ui的布局
+		 * 获取ui的布局元素
 		 * @param ui uicomponent
 		 * @return elementUI
 		 * 
@@ -139,7 +117,7 @@ package potato.editor.layout
 			var ui:ISprite;
 			if(obj is ISprite){
 				ui=ISprite(obj);
-				return _childrenDic[ui];
+				return _childrenMap[ui];
 			}else
 				return null;
 			
@@ -147,8 +125,10 @@ package potato.editor.layout
 		
 		override public function dispose():void{
 			super.dispose();
-			
-			this._childrenDic==new Dictionary();
+			for each(var children:LayoutElement in _childrenElements){
+				children.dispose();
+			}
+			this._childrenMap==new Dictionary();
 			this._childrenElements=new Vector.<LayoutElement>();
 		}
 	}

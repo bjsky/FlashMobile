@@ -2,15 +2,35 @@ package potato.component.data
 {
 	import flash.net.registerClassAlias;
 	
+	import core.display.Texture;
 	import core.display.TextureData;
+	
+	import potato.res.Res;
 
+	/**
+	 * 纹理皮肤.
+	 * <p>设置纹理名时，从纹理管理器的图集中加载纹理数据。同时设置纹理数据和纹理名时，使用纹理数据</p>
+	 * @author liuxin
+	 * 
+	 */
 	public class BitmapSkin
 	{
-		public function BitmapSkin(textureData:TextureData=null,textureName:String="",grid9:String="")
+		/**
+		 * 创建纹理皮肤 
+		 * @param texture 纹理名/纹理数据/纹理
+		 * @param grid9
+		 * 
+		 */
+		public function BitmapSkin(texture:*=null,grid9:String="")
 		{
-			this.textureData=textureData;
-			this.textureName=textureName;
+			if(texture is String)
+				this.textureName=texture as String;
+			else if(texture is TextureData)
+				this.textureData=texture as TextureData;
+			else if(texture is Texture)
+				this.textrue=texture as Texture;
 			this.grid9=grid9;
+			_textureValidate=false;
 		}
 
 		/**
@@ -21,56 +41,66 @@ package potato.component.data
 			registerClassAlias("potato.component.data.BitmapSkin",BitmapSkin);
 		}
 		
-//		/**
-//		 * 创建皮肤 
-//		 * @param texture
-//		 * @param grid9
-//		 * @return 
-//		 * 
-//		 */
-//		static public function create(texture:Texture,grid9:String=""):BitmapSkin{
-//			var skin:BitmapSkin=new BitmapSkin();
-//			skin.texture=texture;
-//			skin.grid9=grid9;
-//			return skin;
-//		}
-//		
-//		/**
-//		 * 从纹理名创建皮肤 
-//		 * @param textureName
-//		 * @param grid9
-//		 * @return 
-//		 * 
-//		 */
-//		static public function createWithName(textureName:String,grid9:String=""):BitmapSkin{
-//			var skin:BitmapSkin=new BitmapSkin();
-//			skin.textureName=textureName;
-//			skin.grid9=grid9;
-//			return skin;
-//		}
+		
 		
 		private var _textureName:String;
 		private var _grid9:String;
+		private var _grid9Arr:Array=[0,0,0,0];
 		private var _textureData:TextureData
+		private var _textrue:Texture;
+		private var _textureValidate:Boolean=false;
+		private var _cacheTexture:Texture;
+		/**
+		 * 纹理名 
+		 * @return 
+		 * 
+		 */
+		public function get textureName():String
+		{
+			return _textureName;
+		}
+		
+		public function set textureName(value:String):void
+		{
+			_textureName = value;
+			_textureValidate=false;
+		}
 		
 		/**
-		 * textureData 
+		 * 纹理数据
 		 * @return 
 		 * 
 		 */
 		public function get textureData():TextureData
 		{
-			return _textureData;
+			return  _textureData;
 		}
 		
 		public function set textureData(value:TextureData):void
 		{
 			_textureData = value;
+			_textureValidate=false;
 		}
 		
-
 		/**
-		 * grid9 
+		 * 纹理 
+		 * @return 
+		 * 
+		 */
+		public function get textrue():Texture
+		{
+			return _textrue;
+		}
+		
+		public function set textrue(value:Texture):void
+		{
+			_textrue = value;
+			_textureValidate=false;
+		}
+		
+		
+		/**
+		 * 九宫格字符串，格式：左,上,右,下
 		 * @return 
 		 * 
 		 */
@@ -83,21 +113,29 @@ package potato.component.data
 		{
 			_grid9 = value;
 		}
-
-		/**
-		 * 纹理名 
-		 * @return 
-		 * 
-		 */
-		public function get textureName():String
-		{
-			return _textureName;
+		
+		
+		public function getTexture():Texture{
+			if(!_textureValidate){
+				_textureValidate=true;
+				if(_textrue)
+					_cacheTexture = _textrue;
+				else if(_textureData)
+					_cacheTexture = new Texture(_textureData);
+				else if(_textureName)
+					_cacheTexture = Res.getTexture(_textureName);
+				else 
+					_cacheTexture = null;
+			}
+			return _cacheTexture;
 		}
-
-		public function set textureName(value:String):void
-		{
-			_textureName = value;
+		
+		public function get width():Number{
+			return getTexture()?getTexture().width:0;
 		}
-
+		
+		public function get height():Number{
+			return getTexture()?getTexture().height:0;
+		}
 	}
 }

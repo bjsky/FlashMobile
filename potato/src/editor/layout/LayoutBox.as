@@ -1,13 +1,14 @@
 package potato.editor.layout
 {
 	import flash.net.registerClassAlias;
-	import flash.utils.Dictionary;
 	
 	import potato.potato_internal;
-	import potato.component.ISprite;
+	import potato.component.interf.IContainer;
+	import potato.component.interf.ISprite;
 	
 	/**
-	 * box布局 
+	 * box布局.
+	 * <p>子布局按照水平或者垂直排列的布局。水平方向，忽略水平对齐。垂直方向，忽略垂直对齐</p>
 	 * @author liuxin
 	 * 
 	 */
@@ -36,6 +37,32 @@ package potato.editor.layout
 		 */		
 		static public const VERTICAL:String="vertical";
 		
+		
+		/**
+		 * 向上对齐,适用于verticalAlign
+		 */
+		static public const TOP:String="top";
+		
+		/**
+		 * 向下对齐,适用于verticalAlign 
+		 */		
+		static public const BOTTOM:String="bottom";
+		
+		/**
+		 * 向左对齐,适用于horizontalAlign 
+		 */		
+		static public const LEFT:String="left";
+		
+		/**
+		 * 向右对齐,适用于horizontalAlign 
+		 */		
+		static public const RIGHT:String="right";
+		
+		/**
+		 * 居中对齐,适用于verticalAlign ,horizontalAlign 
+		 */		
+		static public const CENTER:String="center";
+		
 		/**
 		 * 注册别名 
 		 * 
@@ -44,24 +71,6 @@ package potato.editor.layout
 			registerClassAlias("potato.layout.LayoutBox",LayoutBox);
 		}
 		
-//		/**
-//		 * 创建一个box布局  
-//		 * @param ui
-//		 * @param direction
-//		 * @param align
-//		 * @param gap
-//		 * @return 
-//		 * 
-//		 */
-//		static public function create(ui:ISprite,direction:String="horizontal",align:String="top",gap:Number=2):LayoutBox{
-//			var lb:LayoutBox=new LayoutBox();
-//			lb.ui=ui;
-//			lb.direction=direction;
-//			lb.align=align;
-//			lb.gap=gap;
-//			return lb;
-//		}
-//		
 		//-------------------------
 		// property
 		//-------------------------
@@ -82,7 +91,6 @@ package potato.editor.layout
 		public function get direction():String{
 			return _direction;
 		}
-		
 		
 		/**
 		 * 垂直对齐 
@@ -127,62 +135,69 @@ package potato.editor.layout
 			return _gap;
 		}
 		
+		
 		//-----------------------
 		// override function
 		//-----------------------
 		/**
-		 * 重写计算布局的测量宽 
+		 * 重写宽 
 		 * @return 
 		 * 
 		 */
-		override public function measureWidth():Number{
-			var max:Number = 0;
-			if(direction==VERTICAL) 
-			{
-				for (var i:int = _childrenElements.length - 1; i > -1; i--) {
-					max = Math.max(_childrenElements[i].scaleWidth, max);
+		override protected function get measureWidth():Number{
+			if(!isNaN(IContainer(ui).explicitWidth))
+				return IContainer(ui).explicitWidth;
+			else{
+				var max:Number = 0;
+				if(direction==VERTICAL) 
+				{
+					for (var i:int = _childrenElements.length - 1; i > -1; i--) {
+						max = Math.max(_childrenElements[i].scaledWidth, max);
+					}
+				}else if(direction== HORIZONTIAL){
+					for (i = _childrenElements.length - 1; i > -1; i--) {
+						if(i==0)
+							max += _childrenElements[i].scaledWidth;
+						else
+							max += _childrenElements[i].scaledWidth + gap;
+					}
 				}
-			}else if(direction== HORIZONTIAL){
-				for (i = _childrenElements.length - 1; i > -1; i--) {
-					if(i==0)
-						max += _childrenElements[i].scaleWidth;
-					else
-						max += _childrenElements[i].scaleWidth + gap;
-				}
+				return max;
 			}
-			return max;
 		}
 		
 		/**
-		 * 重写计算布局的测量宽 
+		 * 重写高
 		 * @return 
 		 * 
 		 */
-		override public function measureHeight():Number{
-			var max:Number = 0;
-			if(direction==HORIZONTIAL){
-				for (var i:int = _childrenElements.length - 1; i > -1; i--) {
-					max = Math.max(_childrenElements[i].scaleHeight, max);
+		override protected function get measureHeight():Number{
+			if(!isNaN(IContainer(ui).explicitHeight))
+				return IContainer(ui).explicitHeight;
+			else{
+				var max:Number = 0;
+				if(direction==HORIZONTIAL){
+					for (var i:int = _childrenElements.length - 1; i > -1; i--) {
+						max = Math.max(_childrenElements[i].scaledHeight, max);
+					}
+				}else if(direction==VERTICAL){
+					for (i = _childrenElements.length - 1; i > -1; i--) {
+						if(i==0)
+							max += _childrenElements[i].scaledHeight;
+						else
+							max += _childrenElements[i].scaledHeight + gap;
+					}
 				}
-			}else if(direction==VERTICAL){
-				for (i = _childrenElements.length - 1; i > -1; i--) {
-					if(i==0)
-						max += _childrenElements[i].scaleHeight;
-					else
-						max += _childrenElements[i].scaleHeight + gap;
-				}
+				return max;
 			}
-			return max;
 		}
 
 		/**
 		 * 重写刷新布局，设置子对象位置 
 		 * 
 		 */
-		private var _elemPositonMap:Dictionary=new Dictionary();
-		override potato_internal function measureLayout():void{
+		override protected function measureLayout():void{
 			super.measureLayout();
-			
 			var xSum:Number=0,ySum:Number=0;
 			for (var i:int=0;i<_childrenElements.length;i++){
 				var elem:LayoutElement =_childrenElements[i];
@@ -193,11 +208,11 @@ package potato.editor.layout
 					else
 						xSum+= elem.width + gap;
 					
-					if(verticalAlign==LayoutBoxAlign.TOP){
+					if(verticalAlign==TOP){
 						elem.y=0;
-					}else if(verticalAlign==LayoutBoxAlign.CENTER){
+					}else if(verticalAlign==CENTER){
 						elem.y=(height-elem.height)/2;
-					}else if(verticalAlign==LayoutBoxAlign.BOTTOM){
+					}else if(verticalAlign==BOTTOM){
 						elem.y=height-elem.height;
 					}
 				}else if(direction==VERTICAL){	//垂直方向
@@ -208,37 +223,16 @@ package potato.editor.layout
 					else
 						ySum+= elem.height + gap;
 					
-					if(horizontalAlign==LayoutBoxAlign.LEFT){
+					if(horizontalAlign==LEFT){
 						elem.x=0;
-					}else if(horizontalAlign==LayoutBoxAlign.CENTER){
+					}else if(horizontalAlign==CENTER){
 						elem.x=(width-elem.width)/2;
-					}else if(horizontalAlign==LayoutBoxAlign.RIGHT){
+					}else if(horizontalAlign==RIGHT){
 						elem.x=width-elem.width;
 					}
 				}
 				
-				elem.measureLayout();
-			}
-			
-			//调整位置
-			for each(elem in _childrenElements){
-				if(direction==HORIZONTIAL){
-					if(horizontalAlign==LayoutBoxAlign.LEFT){
-						elem.x+=0;
-					}else if(horizontalAlign==LayoutBoxAlign.CENTER){
-						elem.x+=(width-xSum)/2;
-					}else if(horizontalAlign==LayoutBoxAlign.RIGHT){
-						elem.x+=(width-xSum);
-					}
-				}else if(direction==VERTICAL){
-					if(verticalAlign==LayoutBoxAlign.TOP){
-						elem.y+=0;
-					}else if(verticalAlign==LayoutBoxAlign.CENTER){
-						elem.y+=(height-ySum)/2;
-					}else if(verticalAlign==LayoutBoxAlign.BOTTOM){
-						elem.y+=(height-ySum);
-					}
-				}
+				elem.measure();
 			}
 		}
 	}

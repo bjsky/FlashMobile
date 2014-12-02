@@ -12,60 +12,74 @@ package potato.editor
 	import potato.component.Bitmap;
 	import potato.component.Button;
 	import potato.component.Container;
-	import potato.component.ISprite;
 	import potato.component.List;
 	import potato.component.Text;
 	import potato.component.data.BitmapSkin;
 	import potato.component.data.Padding;
 	import potato.component.data.TextFormat;
+	import potato.component.interf.ISprite;
 	import potato.event.GestureEvent;
 	import potato.event.ListEvent;
+	import potato.event.PotatoEvent;
 	import potato.gesture.TapGesture;
+	import potato.manager.RenderManager;
 	
 	/**
-	 * 下拉框 ,编辑器使用
+	 * 列表选择改变事件.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="listSelectChange",type="potato.event.ListEvent")]
+	
+	/**
+	 * 子项点击事件
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="listItemTap",type="potato.event.ListEvent")]
+	/**
+	 * 下拉框.
 	 * @author liuxin
 	 * 
 	 */
 	public class Combo extends DisplayObjectContainer
 		implements ISprite
 	{
-		public function Combo(dataSource:Object=null,itemRender:Class=null,textFormat:TextFormat=null
+		/**
+		 * 创建一个下拉框 
+		 * @param dataSource 数据源
+		 * @param itemRender 渲染器
+		 * @param skins 皮肤
+		 * @param textFormat 文字样式
+		 * @param width 宽
+		 * @param height 高
+		 * @param listHeight 列表高
+		 * @param listPadding 列表填充
+		 * 
+		 */
+		public function Combo(dataSource:Object=null,itemRender:Class=null,skins:ComboSkin=null,textFormat:TextFormat=null
 							  ,width:Number=NaN,height:Number=NaN,listHeight:Number=NaN,listPadding:Padding=null)
 		{
 			super();
 			createChildren();
-			this.$dataSource=dataSource;
-			this.$itemRender=itemRender;
-			this.$textFormat=textFormat;
-			this.$width=width;
-			this.$height=height;
-			this.$listHeight=listHeight;
-			this.$listPadding=listPadding;
-			render();
-			selectIndex=-1;
+			this.dataSource=dataSource;
+			this.itemRender=itemRender;
+			this.skins=skins;
+			this.textFormat=textFormat;
+			this.width=width;
+			this.height=height;
+			this.listHeight=listHeight;
+			this.listPadding=listPadding;
+			this.selectIndex=-1;
 		}
 		
 
 
-
-
-		public function setSkins(textSkin:BitmapSkin=null,listSkin:BitmapSkin=null,listWidthAdjust:Number=NaN
-								 ,buttonUpSkin:BitmapSkin=null,buttonDownSkin:BitmapSkin=null
-								  ,buttonMarginTop:Number=NaN,buttonMarginRight:Number=NaN):void{
-			this.$textSkin=textSkin;
-			this.$listSkin=listSkin;
-			this.$listWidthAdjust=listWidthAdjust;
-			this.$buttonUpSkin=buttonUpSkin;
-			this.$buttonDownSkin=buttonDownSkin;
-			this.$buttonMarginTop=buttonMarginTop;
-			this.$buttonMarginRight=buttonMarginRight;
-			render();
-		}
-		/**
-		 * 默认宽度 
-		 */		
+//		/**
+//		 * 默认宽度 
+//		 */		
 		private static const DEFAULT_WIDTH:Number=150;
+		private static const DEFAULT_HEIGHT:Number=30;
 		//----------------------------
 		//	ISprite
 		//----------------------------
@@ -73,22 +87,60 @@ package potato.editor
 		protected var _height:Number;
 		protected var _scale:Number;
 		protected var _disable:Boolean=false;
-
+		private var _validateMode:uint=RenderManager.CALLLATER;
+		
+		
+		/**
+		 * 渲染模式
+		 * @return 
+		 * 
+		 */
+		public function get validateMode():uint
+		{
+			return _validateMode;
+		}
+		
+		public function set validateMode(value:uint):void
+		{
+			_validateMode = value;
+			RenderManager.validateNow(this);
+		}
+		
+		/**
+		 * 组件失效
+		 * @param method
+		 * @param args
+		 * 
+		 */
+		public function invalidate(method:Function, args:Array = null):void{
+			RenderManager.invalidateProperty(this,method,args);
+		}
+		
+		
+		/**
+		 * 验证
+		 * 
+		 */
+		public function validate():void{
+			render();
+		}
+		
 		/**
 		 * 宽度
 		 * @param value
 		 * 
 		 */
 		public function set width(value:Number):void{
-			$width=value;
-			render();
+			if(_width!=value){
+				_width=value;
+				invalidate(render);
+			}
 		}
 		override public function get width():Number{
-			return _width;
-		}
-		
-		public function set $width(value:Number):void{
-			_width=value;
+			if(!isNaN(_width))
+				return _width;
+			else
+				return _textSkin?_textSkin.width:DEFAULT_WIDTH;
 		}
 		
 		/**
@@ -97,15 +149,16 @@ package potato.editor
 		 * 
 		 */
 		public function set height(value:Number):void{
-			$height=value;
-			renderText();
+			if(_height!=value){
+				_height=value;
+				invalidate(render);
+			}
 		}
 		override public function get height():Number{
-			return _height;
-		}
-		
-		public function set $height(value:Number):void{
-			_height=value;
+			if(!isNaN(_height))
+				return _height;
+			else
+				return _textSkin?_textSkin.height:DEFAULT_HEIGHT;
 		}
 		
 		/**
@@ -124,11 +177,13 @@ package potato.editor
 		//--------------------------
 		//	property
 		//--------------------------
+		private var _skins:ComboSkin;
 		private var _listHeight:Number;
 		private var _textSkin:BitmapSkin;
 		private var _textFormat:TextFormat;
 		private var _buttonUpSkin:BitmapSkin;
 		private var _buttonDownSkin:BitmapSkin;
+		private var _buttonDisableSkin:BitmapSkin;
 		private var _listSkin:BitmapSkin;
 		private var _listColor:uint=0x0;
 		private var _listColorChanged:Boolean=false;
@@ -140,6 +195,31 @@ package potato.editor
 		private var _buttonMarginRight:Number;
 		private var _buttonMarginTop:Number;
 		
+		private var _itemRender:*;
+		private var _dataSource:Object;
+		private var _listSelectIndex:int=-1;
+		/**
+		 * 下拉框皮肤 
+		 * @return 
+		 * 
+		 */		
+		public function get skins():ComboSkin
+		{
+			return _skins;
+		}
+		
+		public function set skins(value:ComboSkin):void
+		{
+			_skins = value;
+			this.textSkin=value.textSkin;
+			this.listSkin=value.listSkin;
+			this.listWidthAdjust=value.listWidthAdjust;
+			this.buttonUpSkin=value.buttonUpSkin;
+			this.buttonDownSkin=value.buttonDownSkin;
+			this.buttonDisableSkin=value.buttonDisableSkin;
+			this.buttonMarginTop=value.buttonMarginTop;
+			this.buttonMarginRight=value.buttonMarginRight;
+		}
 		
 		/**
 		 * 列表宽度调整 
@@ -153,13 +233,12 @@ package potato.editor
 		
 		public function set listWidthAdjust(value:Number):void
 		{
-			$listWidthAdjust = value;
-			renderList();
+			if(_listWidthAdjust!=value){
+				_listWidthAdjust = value;
+				invalidate(render);
+			}
 		}
-		public function set $listWidthAdjust(value:Number):void
-		{
-			_listWidthAdjust = value;
-		}
+
 		/**
 		 * 列表内容边距 
 		 * @return 
@@ -172,13 +251,10 @@ package potato.editor
 		
 		public function set listPadding(value:Padding):void
 		{
-			$listPadding = value;
-			renderList();
-		}
-		public function set $listPadding(value:Padding):void
-		{
 			_listPadding = value;
+			invalidate(render);
 		}
+		
 		/**
 		 * 按钮上边距 
 		 * @return 
@@ -191,12 +267,10 @@ package potato.editor
 		
 		public function set buttonMarginTop(value:Number):void
 		{
-			$buttonMarginTop = value;
-			renderButton();
-		}
-		public function set $buttonMarginTop(value:Number):void
-		{
-			_buttonMarginTop = value;
+			if(_buttonMarginTop!=value){
+				_buttonMarginTop = value;
+				invalidate(render);
+			}
 		}
 		
 		/**
@@ -211,12 +285,12 @@ package potato.editor
 		
 		public function set buttonMarginRight(value:Number):void
 		{
-			$buttonMarginRight=value;
-			renderButton();
+			if(_buttonMarginRight!=value){
+				_buttonMarginRight = value;
+				invalidate(render);
+			}
 		}
-		public function set $buttonMarginRight(value:Number):void{
-			_buttonMarginRight = value;
-		}
+
 		/**
 		 * 自动定位 
 		 * @return 
@@ -254,12 +328,8 @@ package potato.editor
 		
 		public function set listSkin(value:BitmapSkin):void
 		{
-			$listSkin = value;
-			renderList();
-		}
-		public function set $listSkin(value:BitmapSkin):void
-		{
 			_listSkin = value;
+			invalidate(render);
 		}
 		
 		/**
@@ -274,14 +344,10 @@ package potato.editor
 		
 		public function set buttonDownSkin(value:BitmapSkin):void
 		{
-			$buttonDownSkin = value;
-			renderButton();
-		}
-		public function set $buttonDownSkin(value:BitmapSkin):void
-		{
 			_buttonDownSkin = value;
+			invalidate(render);
 		}
-		
+
 		/**
 		 * 按钮正常皮肤 
 		 * @return 
@@ -294,14 +360,26 @@ package potato.editor
 		
 		public function set buttonUpSkin(value:BitmapSkin):void
 		{
-			$buttonUpSkin = value;
-			renderButton();
-		}
-		public function set $buttonUpSkin(value:BitmapSkin):void
-		{
 			_buttonUpSkin = value;
+			invalidate(render);
 		}
 		
+		/**
+		 * 按钮禁用皮肤 
+		 * @return 
+		 * 
+		 */
+		public function get buttonDisableSkin():BitmapSkin
+		{
+			return _buttonDisableSkin;
+		}
+		
+		public function set buttonDisableSkin(value:BitmapSkin):void
+		{
+			_buttonDisableSkin = value;
+			invalidate(render);
+		}
+
 		/**
 		 * 文字皮肤 
 		 * @return 
@@ -314,12 +392,8 @@ package potato.editor
 		
 		public function set textSkin(value:BitmapSkin):void
 		{
-			$textSkin = value;
-			renderText();
-		}
-		public function set $textSkin(value:BitmapSkin):void
-		{
 			_textSkin = value;
+			invalidate(render);
 		}
 		
 		/**
@@ -329,17 +403,13 @@ package potato.editor
 		 */
 		public function get itemRender():Class
 		{
-			return _list.itemRender;
+			return _itemRender;
 		}
 		
 		public function set itemRender(value:Class):void
 		{
-			$itemRender = value;
-			renderList();
-		}
-		public function set $itemRender(value:Class):void
-		{
-			_list.$itemRender=value;
+			_itemRender=value;
+			invalidate(render);
 		}
 		
 		/**
@@ -349,18 +419,14 @@ package potato.editor
 		 */
 		public function get dataSource():Object
 		{
-			return _list.dataSource;
+			return _dataSource;
 		}
 		
 		public function set dataSource(value:Object):void
 		{
-			$dataSource = value;
-			renderList();
+			_dataSource=value;
 			selectIndex=-1;
-		}
-		public function set $dataSource(value:Object):void
-		{
-			_list.$dataSource=value;
+			invalidate(render);
 		}
 		
 		/**
@@ -375,14 +441,12 @@ package potato.editor
 		
 		public function set listHeight(value:Number):void
 		{
-			$listHeight = value;
-			renderList();
+			if(_listHeight != value){
+				_listHeight = value;
+				invalidate(render);
+			}
 		}
-		public function set $listHeight(value:Number):void
-		{
-			_listHeight = value;
-		}
-		
+
 		/**
 		 * 列表背景颜色 
 		 * @return 
@@ -395,14 +459,11 @@ package potato.editor
 		
 		public function set listColor(value:uint):void
 		{
-			$listColor = value;
-			_listColorChanged=true;
-			renderList();
-		}
-		public function set $listColor(value:uint):void
-		{
 			_listColor = value;
+			_listColorChanged=true;
+			invalidate(render);
 		}
+
 		/**
 		 * 文字样式 
 		 * @return 
@@ -415,12 +476,8 @@ package potato.editor
 		
 		public function set textFormat(value:TextFormat):void
 		{
-			$textFormat = value;
-			renderText();
-		}
-		public function set $textFormat(value:TextFormat):void
-		{
 			_textFormat = value;
+			invalidate(render);
 		}
 		
 		/**
@@ -432,20 +489,16 @@ package potato.editor
 		{
 			return _list.selectIndex;
 		}
-		
+		private var _selectIndex:int=-1;
 		public function set selectIndex(value:int):void
 		{
-			_list.selectIndex=value;
-			$selectIndex = value;
-		}
-		
-		public function set $selectIndex(value:int):void
-		{
-			var textStr:String="";
-			if(_list.selectItem){
-				textStr=_list.selectItem.label;
+			if(_selectIndex!=value){
+				_selectIndex=value;
+				if(_selectIndex<0)
+					_txt.text="";
+				invalidate(render);
+				
 			}
-			_txt.text=textStr;
 		}
 		//--------------------------
 		// property
@@ -475,12 +528,12 @@ package potato.editor
 			_listContianer.addChild(_listBg);
 			_list=new List();
 			_list.selectType=List.SELECT_SINGLE;
-			_list.verticalScrollerVisible=false;
-			_list.horizontalScrollerVisible=false;
-			_list.horizontalScrollEnable=false;
+			_list.vScrollerVisible=false;
+			_list.hScrollerVisible=false;
+			_list.hScrollEnable=false;
+//			_list.delayEnable=false;
 			_list.addEventListener(ListEvent.LIST_SELECT_CHANGE,onListChange);
-			_list.addEventListener(ListEvent.LIST_ITEM_TAP,onListTap);
-			_list.addEventListener(ListEvent.LIST_ITEM_DOUBLE_TAP,onListDoubleTap);
+			_list.addEventListener(ListEvent.LIST_ITEM_TAP,onListItemTap);
 			_listContianer.addChild(_list);
 		}
 		
@@ -490,7 +543,7 @@ package potato.editor
 			showList(_isShow);
 		}
 		
-		private function showList(isShow:Boolean):void{
+		public function showList(isShow:Boolean):void{
 			if(isShow){
 				if(!_listContianer.parent){
 					_listContianer.visible=false;
@@ -507,21 +560,27 @@ package potato.editor
 		
 		//列表项改变
 		private function onListChange(e:ListEvent):void{
-			$selectIndex=_list.selectIndex;
+			e.stopPropagation();
 			this.dispatchEvent(new ListEvent(ListEvent.LIST_SELECT_CHANGE,e.item,true));
+			e=null;
+			
+			_selectIndex=_list.selectIndex;
+			if(_list.selectItem){
+				_txt.text=_list.selectItem.label;
+			}else{
+				_txt.text="";
+			}
 			_isShow=false;
 			showList(_isShow);
 		}
-		
-		private function onListTap(e:ListEvent):void{
+		private function onListItemTap(e:ListEvent):void{
+			e.stopPropagation();
 			this.dispatchEvent(new ListEvent(ListEvent.LIST_ITEM_TAP,e.item,true));
+			e=null;
 		}
 		
-		private function onListDoubleTap(e:ListEvent):void{
-			this.dispatchEvent(new ListEvent(ListEvent.LIST_ITEM_DOUBLE_TAP,e.item,true));
-		}
-		private var _prevStageX:Number=0;
-		private var _prevStageY:Number=0;
+		private var _prevStageX:Number;
+		private var _prevStageY:Number;
 		private function onFrame(e:Event=null):void{
 			var p:Point=parent.localToGlobal(new Point(x,y));
 			if(p.x!=_prevStageX || p.y!=_prevStageY){
@@ -534,79 +593,74 @@ package potato.editor
 			_listContianer.visible=true;
 		}
 		
-		public function render():void
+		private function render():void
 		{
-			renderText();
-			renderList();
+			//txtBg
+			_txtBg.skin=_textSkin;
+			_txtBg.width=_width;
+			_txtBg.height=_height;
+			
+			//button
+			_button.upSkin=_buttonUpSkin;
+			_button.downSkin=_buttonDownSkin;
+			_button.x=_txtBg.width-_button.width-(isNaN(_buttonMarginRight)?0:_buttonMarginRight);
+			_button.y=isNaN(_buttonMarginTop)?(_txtBg.height-_button.height)/2:_buttonMarginTop;
+			
+			//txt
+			_txt.width=width-_button.width;
+			_txt.height=_txtBg.height;
+			_txt.textFormat=_textFormat;
+			
+			//list
+			_list.width=listWidth-(listPadding?listPadding.paddingLeft+listPadding.paddingRight:0);
+			if(!isNaN(_listHeight)){
+				_list.height=_listHeight;
+			}
+			_list.dataSource=_dataSource;
+			_list.itemRender=_itemRender;
+			_list.x=listPadding?listPadding.paddingLeft:0;
+			_list.y=listPadding?listPadding.paddingTop:0;
+			_list.addEventListener(PotatoEvent.RENDER_COMPLETE,function(e:PotatoEvent):void{
+				renderList();
+			});
+			_list.selectIndex=_selectIndex;
+		}
+		private function renderList():void{
+			//list
+			if(_listSkin){
+				_listBg.skin=_listSkin;
+				_listBg.width=listWidth;
+				_listBg.height=_list.height+(listPadding?listPadding.paddingTop+listPadding.paddingBottom:0);
+			}else if(_listColorChanged){
+				_bgtd=TextureData.createRGB(listWidth,_list.height);
+				_barSha=new Shape();
+				_barSha.graphics.beginFill(_listColor);
+				_barSha.graphics.drawRect(0,0,listWidth,_list.height);
+				_barSha.graphics.endFill();
+				_bgtd.draw(_barSha);
+				_listBg.width=listWidth;
+				_listBg.height=_list.height+(listPadding?listPadding.paddingTop+listPadding.paddingBottom:0);
+				_listBg.texture=new Texture(_bgtd);
+			}
 		}
 		
 		private var _bgtd:TextureData;
 		private var _barSha:Shape;
-		private function renderList():void{
-			var lw:Number=isNaN(_width)?DEFAULT_WIDTH:_width;
-			//WidthAdjust
-			lw+=isNaN(_listWidthAdjust)?0:_listWidthAdjust;
-			//list
-			_list.$width=lw-(listPadding?listPadding.paddingLeft+listPadding.paddingRight:0);
-			if(!isNaN(_listHeight))
-				_list.$height=_listHeight;
-			_list.render();
-			_list.x=listPadding?listPadding.paddingLeft:0;
-			_list.y=listPadding?listPadding.paddingTop:0;
-			var lh:Number=_list.height;
-			//listBg
-			if(_listSkin){
-				_listBg.$skin=_listSkin;
-				_listBg.$width=lw;
-				_listBg.$height=lh+(listPadding?listPadding.paddingTop+listPadding.paddingBottom:0);
-				_listBg.render();
-			}else if(_listColorChanged){
-				_bgtd=TextureData.createRGB(lw,lh);
-				_barSha=new Shape();
-				_barSha.graphics.beginFill(_listColor);
-				_barSha.graphics.drawRect(0,0,lw,lh);
-				_barSha.graphics.endFill();
-				_bgtd.draw(_barSha);
-				_listBg.$width=lw;
-				_listBg.$height=lh+(listPadding?listPadding.paddingTop+listPadding.paddingBottom:0);
-				_listBg.texture=new Texture(_bgtd);
-			}
-		}
-		private function renderText():void{
-			var lw:Number=isNaN(_width)?DEFAULT_WIDTH:_width;
-			_txtBg.$skin=_textSkin;
-			_txtBg.$width=lw;
-			_txtBg.$height=_height;
-			_txtBg.render();
-			
-			renderButton();
-			var bw:Number=isNaN(_button.width)?0:_button.width;
-			_txt.$width=lw-bw;
-			_txt.$height=_txtBg.height;
-			_txt.$textFormat=_textFormat;
-			_txt.render();
-		}
 		
-		private function renderButton():void{
-			_button.$upSkin=_buttonUpSkin;
-			_button.$downSkin=_buttonDownSkin;
-			_button.render();
-			var bw:Number=isNaN(_button.width)?0:_button.width;
-			var bh:Number=isNaN(_button.height)?0:_button.height;
-			_button.x=_txtBg.width-bw-(isNaN(_buttonMarginRight)?0:_buttonMarginRight);
-			_button.y=isNaN(_buttonMarginTop)?(_txtBg.height-bh)/2:_buttonMarginTop;
+		private function get listWidth():Number{
+			return isNaN(_listWidthAdjust)?width:width+_listWidthAdjust;
 		}
 		
 		public override function  dispose():void{
 			super.dispose();
+			RenderManager.dispose(this);
+			
 			showList(false);
 			this.autoPosition=false;
 			_txtTap.removeEventListener(GestureEvent.TAP,onTap);
 			_txtTap.dispose();
 			_list.removeEventListener(ListEvent.LIST_SELECT_CHANGE,onListChange);
-			_list.removeEventListener(ListEvent.LIST_ITEM_TAP,onListTap);
-			_list.removeEventListener(ListEvent.LIST_ITEM_DOUBLE_TAP,onListDoubleTap);
-			
+			_list.removeEventListener(ListEvent.LIST_ITEM_TAP,onListItemTap);
 		}
 	}
 }

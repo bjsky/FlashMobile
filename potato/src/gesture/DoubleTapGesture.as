@@ -10,7 +10,14 @@ package potato.gesture
 	import potato.event.GestureEvent;
 
 	/**
-	 * 双击手势 
+	 * 双击事件.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="doubleTap",type="potato.event.GestureEvent")]
+	/**
+	 * 双击手势.
+	 * <p>一定时间有效范围内的两次按下抬起被认定为双击</p> 
 	 * @author liuxin
 	 * 
 	 */

@@ -3,10 +3,12 @@ package  potato.editor.layout
 	import flash.net.registerClassAlias;
 	
 	import potato.potato_internal;
-	import potato.component.ISprite;
+	import potato.component.interf.IContainer;
+	import potato.component.interf.ISprite;
 	
 	/**
-	 * 绝对布局 
+	 * 绝对布局.
+	 * <p>使用布局元素的绝对布局属性的布局，包括left，right，top，bottom，centerX，centerY</p> 
 	 * @author liuxin
 	 * 
 	 */
@@ -26,80 +28,75 @@ package  potato.editor.layout
 			registerClassAlias("potato.layout.LayoutCanvas",LayoutCanvas);
 		}
 		
-//		/**
-//		 * 创建一个canvas布局 
-//		 * @param ui
-//		 * @return 
-//		 * 
-//		 */
-//		static public function create(ui:ISprite):LayoutCanvas{
-//			var lc:LayoutCanvas=new LayoutCanvas();
-//			lc.ui=ui;
-//			return lc;
-//		}
-//		
 		//-----------------------
 		// override function
 		//-----------------------		
 		/**
-		 * 重写计算布局的测量宽 
+		 * 重写宽 
 		 * @return 
 		 * 
 		 */
-		override public function measureWidth():Number{
-			var max:Number = 0;
-			for (var i:int = _childrenElements.length - 1; i > -1; i--) {
-				var elem:LayoutElement = _childrenElements[i];
-				max = Math.max(elem.x + elem.scaleWidth, max);
+		override protected function get measureWidth():Number{
+			if(!isNaN(IContainer(ui).explicitWidth))
+				return IContainer(ui).explicitWidth;
+			else{
+				var max:Number = 0;
+				for (var i:int = _childrenElements.length - 1; i > -1; i--) {
+					var elem:LayoutElement = _childrenElements[i];
+					max = Math.max(elem.x + elem.scaledWidth, max);
+				}
+				return max;
 			}
-			return max;
 		}
 		
 		/**
-		 * 重写计算布局的测量宽 
+		 * 重写高 
 		 * @return 
 		 * 
 		 */
-		override public function measureHeight():Number{
-			var max:Number = 0;
-			for (var i:int = _childrenElements.length - 1; i > -1; i--) {
-				var elem:LayoutElement = _childrenElements[i];
-				max = Math.max(elem.y + elem.scaleHeight, max);
+		override protected function	get measureHeight():Number{
+			if(!isNaN(IContainer(ui).explicitHeight))
+				return IContainer(ui).explicitHeight;
+			else{
+				var max:Number = 0;
+				for (var i:int = _childrenElements.length - 1; i > -1; i--) {
+					var elem:LayoutElement = _childrenElements[i];
+					max = Math.max(elem.y + elem.scaledHeight, max);
+				}
+				return max;
 			}
-			return max;
 		}
 		
 		/**
 		 * 重写计算布局 
 		 * 
 		 */
-		override potato_internal function measureLayout():void{
+		override protected function measureLayout():void{
 			super.measureLayout();
-			
 			for each(var elem:LayoutElement in _childrenElements){
 				//计算子布局
 				if (!isNaN(elem.centerX)) {
-					elem.x = (width - elem.scaleWidth) * 0.5 + elem.centerX;
+					elem.x = (width - elem.scaledWidth) * 0.5 + elem.centerX;
 				} else if (!isNaN(elem.left)) {
 					elem.x = elem.left;
 					if (!isNaN(elem.right)) {
 						elem.width = width - elem.left - elem.right;
 					}
 				} else if (!isNaN(elem.right)) {
-					elem.x = width - elem.scaleWidth - elem.right;
+					elem.x = width - elem.scaledWidth - elem.right;
 				}
 				if (!isNaN(elem.centerY)) {
-					elem.y = (height - elem.scaleHeight) * 0.5 + elem.centerY;
+					elem.y = (height - elem.scaledHeight) * 0.5 + elem.centerY;
 				} else if (!isNaN(elem.top)) {
 					elem.y = elem.top;
 					if (!isNaN(elem.bottom)) {
 						elem.height = height - elem.top - elem.bottom;
 					}
 				} else if (!isNaN(elem.bottom)) {
-					elem.y = height - elem.scaleHeight - elem.bottom;
+					elem.y = height - elem.scaledHeight - elem.bottom;
 				}
 				//子计算布局
-				elem.measureLayout();
+				elem.measure();
 			}
 		}
 	}

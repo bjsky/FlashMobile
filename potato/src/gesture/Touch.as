@@ -6,6 +6,12 @@ package potato.gesture
 	
 	import potato.potato_internal;
 
+	/**
+	 * 触摸点. 
+	 * <p>封装一次触摸的所有数据，包括开始时间，开始位置，上次时间，上次位置等</p>
+	 * @author liuxin
+	 * 
+	 */
 	public class Touch
 	{
 		public function Touch(id:int=0)
@@ -14,6 +20,7 @@ package potato.gesture
 		}
 		use namespace potato_internal;
 		
+		private var _touchTarget:DisplayObject;
 		private var _target:DisplayObject;
 		private var _currentTarget:Object;
 		private var _id:int;
@@ -23,35 +30,6 @@ package potato.gesture
 		private var _location:Point;
 		private var _previousLocation:Point;
 
-		/**
-		 * 上次位置 
-		 * @return 
-		 * 
-		 */
-		public function get previousLocation():Point
-		{
-			return _previousLocation;
-		}
-
-		/**
-		 * 当前位置 
-		 * @return 
-		 * 
-		 */
-		public function get location():Point
-		{
-			return _location;
-		}
-
-		/**
-		 * 当前时间 
-		 * @return 
-		 * 
-		 */
-		public function get time():Number
-		{
-			return _time;
-		}
 		
 		/**
 		 * 开始位置 
@@ -64,6 +42,26 @@ package potato.gesture
 		}
 
 		/**
+		 * 当前位置 
+		 * @return 
+		 * 
+		 */
+		public function get location():Point
+		{
+			return _location;
+		}
+		
+		/**
+		 * 上次位置 
+		 * @return 
+		 * 
+		 */
+		public function get previousLocation():Point
+		{
+			return _previousLocation;
+		}
+		
+		/**
 		 * 开始时间 
 		 * @return 
 		 * 
@@ -74,7 +72,18 @@ package potato.gesture
 		}
 
 		/**
-		 * 唯一标示符 
+		 * 当前时间 
+		 * @return 
+		 * 
+		 */
+		public function get time():Number
+		{
+			return _time;
+		}
+		
+		
+		/**
+		 * 触摸唯一标示符 
 		 * @return 
 		 * 
 		 */
@@ -82,9 +91,24 @@ package potato.gesture
 		{
 			return _id;
 		}
+		
+		/**
+		 * 触摸事件对象  
+		 * @return 
+		 * 
+		 */		
+		public function get touchTarget():DisplayObject
+		{
+			return _touchTarget;
+		}
+		
+		public function set touchTarget(value:DisplayObject):void
+		{
+			_touchTarget = value;
+		}
 
 		/**
-		 * 开始触摸的对象 
+		 * 触摸的原始对象
 		 * @return 
 		 * 
 		 */
@@ -99,7 +123,7 @@ package potato.gesture
 		}
 		
 		/**
-		 * touch当前的目标 
+		 * 触摸的当前对象 
 		 * @return 
 		 * 
 		 */
@@ -168,11 +192,11 @@ package potato.gesture
 		}
 		
 		/**
-		 * 持续时间
+		 * 时间戳，从开始产生触摸到当前的时间长度
 		 * @return 
 		 * 
 		 */
-		public function get timeDuring():uint{
+		public function get timestamp():uint{
 			return _time-_beginTime;
 		}
 		

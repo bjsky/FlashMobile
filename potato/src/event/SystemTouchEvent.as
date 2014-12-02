@@ -2,7 +2,7 @@ package potato.event {
 	import core.events.TouchEvent;
 	
 	/**
-	 * 系统事件
+	 * 系统触摸事件.
 	 * author floyd
 	 * 2014-5-22 下午5:16:07
 	 */

@@ -7,7 +7,26 @@ package potato.gesture
 	import potato.event.GestureEvent;
 
 	/**
-	 * 平移手势 
+	 * 平移开始.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="panBegin",type="potato.event.GestureEvent")]
+	/**
+	 * 平移过程中.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="panMove",type="potato.event.GestureEvent")]
+	/**
+	 * 平移结束.
+	 * @author liuxin
+	 * 
+	 */
+	[Event(name="panEnd",type="potato.event.GestureEvent")]
+	/**
+	 * 平移手势.
+	 * <p>一定加速度内的移动行为被认定为平移手势</p> 
 	 * @author liuxin
 	 * 
 	 */
@@ -49,7 +68,7 @@ package potato.gesture
 		override public function set state(value:String):void
 		{
 			super.state=value;
-			if(state==BEGAN)
+			if(state==BEGIN)
 				dispatchEvent(new GestureEvent(GestureEvent.PAN_BEGIN));
 			else if(state==CHANGED)
 				this.dispatchEvent(new GestureEvent(GestureEvent.PAN_MOVE));
@@ -82,10 +101,10 @@ package potato.gesture
 		override protected function onTouchMove(touch:Touch):void
 		{
 			super.onTouchMove(touch);
-			if(state==POSSIBLE || state==BEGAN || state ==CHANGED){
+			if(state==POSSIBLE || state==BEGIN || state ==CHANGED){
 				if(state==POSSIBLE)
-					state=BEGAN;
-				else if(state==BEGAN || state==CHANGED)
+					state=BEGIN;
+				else if(state==BEGIN || state==CHANGED)
 					state=CHANGED;
 				
 				updatePanOffset();
@@ -101,7 +120,7 @@ package potato.gesture
 		{
 			super.onTouchEnd(touch);
 			
-			if(state==POSSIBLE || state==BEGAN || state ==CHANGED){
+			if(state==POSSIBLE || state==BEGIN || state ==CHANGED){
 				state=ENDED;
 			}
 		}
