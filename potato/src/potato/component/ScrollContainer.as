@@ -382,6 +382,7 @@ package potato.component
 				_contentBg.alpha=0;
 				//滚动条
 				renderScroller();
+				
 			}
 			
 			

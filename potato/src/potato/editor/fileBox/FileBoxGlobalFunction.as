@@ -50,9 +50,10 @@ package potato.editor.fileBox
 			if ((Utils.platformVer() <= Utils.PV_WIN))
 			{
 				var rootPathArr:Array = Utils.getPCLetters();
+				path = path.toLowerCase();
 				for each (var rootPath:String in rootPathArr)
 				{
-					if (path.indexOf(rootPath) >=0)
+					if (path.indexOf(rootPath.toLowerCase()) >=0)
 						return true;
 				}
 			}

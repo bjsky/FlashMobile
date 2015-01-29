@@ -1,6 +1,6 @@
 package potato.display3d.data
 {
-	public class EffectData
+	public class EffectData extends ElemData
 	{
 		public function EffectData()
 		{
@@ -10,15 +10,15 @@ package potato.display3d.data
 		public var effectName:String;
 		/**效果存活时间（ms）*/
 		public var lifeTime:int;
-		
-		/**
-		 * 子元素 
-		 */		
-		public var effectElemDataArr:Vector.<ElemData>=new Vector.<ElemData>();
-		/**
-		 * 脚本 
-		 */		
-		public var behaviourArr:Vector.<BehaviourData>=new Vector.<BehaviourData>();
+//		
+//		/**
+//		 * 子元素 
+//		 */		
+//		public var effectElemDataArr:Vector.<ElemData>=new Vector.<ElemData>();
+//		/**
+//		 * 脚本 
+//		 */		
+//		public var behaviourArr:Vector.<BehaviourData>=new Vector.<BehaviourData>();
 		
 	}
 }

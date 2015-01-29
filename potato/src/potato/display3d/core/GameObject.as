@@ -1,7 +1,6 @@
 package potato.display3d.core
 {
 	import flash.utils.Dictionary;
-	import flash.utils.getQualifiedClassName;
 	
 	import core.display.DisplayObjectContainer;
 	

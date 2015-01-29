@@ -4,12 +4,12 @@ package potato.display3d
 	import core.display3d.UVAnimation;
 	import core.display3d.UVMatrix;
 	
+	import potato.potato_internal;
 	import potato.display3d.core.GameObject;
 	import potato.display3d.core.IGameContainer;
 	import potato.display3d.core.IGameObject;
 	import potato.display3d.data.MaterialData;
 	import potato.display3d.data.PassData;
-	import potato.potato_internal;
 	
 	/**
 	 * 材质Gameobject包装
@@ -77,6 +77,7 @@ package potato.display3d
 					uv.uTile = pd.frameAnim.x;
 					uv.vTile = pd.frameAnim.y;
 					uv.cycles = pd.frameAnim.z;
+					this.uvMatrix=new UVMatrix();
 					this.uvMatrix.frameAnim = uv;
 				}
 			}else{
