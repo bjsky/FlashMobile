@@ -10,7 +10,6 @@ package potato.editor
 	import potato.component.data.BitmapSkin;
 	import potato.component.data.Padding;
 	import potato.component.data.TextFormat;
-	import potato.utils.SkinUtil;
 	
 	public class FocusedTextInput extends TextInput
 		implements IFocus
@@ -65,7 +64,7 @@ package potato.editor
 		override public function set skins(value:*):void
 		{
 			_skins=value;	
-			_skinsArr=SkinUtil.fillSkins(_skinsArr,value);
+			_skinsArr=BitmapSkin.fillSkins(_skinsArr,value);
 			for (var i:int=0;i<_skinsArr.length;i++){
 				_skinsMap[i]=_skinsArr[i];
 			}

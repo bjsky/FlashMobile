@@ -10,7 +10,7 @@ package potato.editor.tree
 	import potato.component.core.RenderManager;
 	import potato.component.core.RenderType;
 	import potato.component.data.BitmapSkin;
-	import potato.utils.SkinUtil;
+	import potato.utils.Utils;
 
 	/**
 	 * 树形结构
@@ -441,7 +441,7 @@ package potato.editor.tree
 		 */
 		public function set skins(value:String):void{
 			_skins=value;	
-			_skinsArr=SkinUtil.fillArray(_skinsArr,value,String);
+			_skinsArr=Utils.fillArray(_skinsArr,value,String);
 			for (var i:int=0;i<_skinsArr.length;i++){
 				var skinStr:String=_skinsArr[i];
 				if(skinStr){

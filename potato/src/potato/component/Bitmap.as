@@ -8,11 +8,12 @@ package potato.component
 	
 	import potato.component.core.IDataBinding;
 	import potato.component.core.ISprite;
+	import potato.component.core.RenderEvent;
 	import potato.component.core.RenderManager;
 	import potato.component.core.RenderType;
 	import potato.component.data.BitmapSkin;
 	import potato.utils.Filters;
-	import potato.utils.SkinUtil;
+	import potato.utils.Utils;
 
 	/**
 	 * 图像.
@@ -248,7 +249,7 @@ package potato.component
 			_inScaleY=1;
 			if(tex &&(width!=tex.width || height!=tex.height)){
 				if(_skin && _skin.grid9){		//grid9Textrue
-					_grid9Arr=SkinUtil.fillArray(_grid9Arr,_skin.grid9,Number);
+					_grid9Arr=Utils.fillArray(_grid9Arr,_skin.grid9,Number);
 					var rectx:Number,recty:Number,rectw:Number,recth:Number;
 					rectx=_grid9Arr[0]>0?_grid9Arr[0]:0;
 					recty=_grid9Arr[1]>0?_grid9Arr[1]:0;
@@ -268,6 +269,7 @@ package potato.component
 			}
 			super.scaleX=_scaleX*_inScaleX;
 			super.scaleY=_scaleY*_inScaleY;
+			this.dispatchEvent(new RenderEvent(RenderEvent.RENDER_COMPLETE));
 		}
 		
 		/**

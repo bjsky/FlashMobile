@@ -10,13 +10,13 @@ package potato.component
 	
 	import potato.component.core.IDataBinding;
 	import potato.component.core.ISprite;
+	import potato.component.core.RenderEvent;
 	import potato.component.core.RenderManager;
 	import potato.component.core.RenderType;
 	import potato.component.data.BitmapSkin;
 	import potato.component.data.Padding;
 	import potato.gesture.GestureEvent;
 	import potato.gesture.PanGesture;
-	import potato.utils.SkinUtil;
 
 	/**
 	 * 滑块.
@@ -228,7 +228,7 @@ package potato.component
 		 */		
 		public function set skins(value:*):void{
 			_skins=value;
-			_skinsArr=SkinUtil.fillSkins(_skinsArr,value);
+			_skinsArr=BitmapSkin.fillSkins(_skinsArr,value);
 			for (var i:int=0;i<_skinsArr.length;i++){
 				_skinsMap[i]=_skinsArr[i];//BitmapSkin.createWithName(skinStr);
 			}
@@ -308,7 +308,6 @@ package potato.component
 		protected function render():void{
 			if(width<0 || height<0) return;
 			
-			
 			if(barSkin){		//使用皮肤
 				_bar.width=width;
 				_bar.height=height;
@@ -328,6 +327,7 @@ package potato.component
 			renderThumb();
 			//渲染滑块位置
 			renderPosition();
+			this.dispatchEvent(new RenderEvent(RenderEvent.RENDER_COMPLETE));
 		}
 		
 		protected function renderThumb():void{

@@ -1,17 +1,16 @@
 package potato.display3d
 {
+	import core.display3d.Object3D;
+	import core.display3d.ObjectContainer3D;
+	
 	import potato.potato_internal;
-	import potato.display3d.core.GameObject;
-	import potato.display3d.core.IGameContainer;
-	import potato.display3d.core.IGameObject;
 
 	/**
 	 * 脚本基类. 
 	 * @author liuxin
 	 * 
 	 */
-	public class Behaviour extends Object
-		implements IGameObject
+	public class Behaviour
 	{
 		public function Behaviour()
 		{
@@ -27,6 +26,20 @@ package potato.display3d
 		}
 		public function get enable():Boolean{
 			return _enable;
+		}
+		
+		private var _target:Object3D;
+		potato_internal function setTarget(v:Object3D):void{
+			_target=v;
+		}
+		
+		/**
+		 * 附加的容器 
+		 * @return 
+		 * 
+		 */
+		public function get container():ObjectContainer3D{
+			return _target as ObjectContainer3D;
 		}
 		
 		/**
@@ -76,41 +89,12 @@ package potato.display3d
 //			
 //		}
 //		
-		
-		///////////////////
-		// IGameObject
-		//////////////////
-		private var _tag:String;
-		potato_internal var _parentGameObject:IGameContainer;
 		/**
-		 * 标签 
-		 * @param name
-		 * 
-		 */		
-		public function set tag(name:String):void{
-			_tag=name;
-		}
-		
-		public function get tag():String{
-			return _tag;
-		}
-		
-		/**
-		 * 父游戏对象 
-		 * @return 
-		 * 
-		 */
-		public function get parentGameObject():IGameContainer
-		{
-			return _parentGameObject;
-		}
-		
-		/**
-		 * 清理 
+		 * 释放引用 
 		 * 
 		 */		
 		public function dispose():void{
-			GameObject.removeGameObjects(parentGameObject,this);
+			_target=null;
 		}
 	}
 }

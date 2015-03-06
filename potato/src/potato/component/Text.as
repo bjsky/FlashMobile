@@ -5,6 +5,7 @@ package potato.component
 	
 	import potato.component.core.IDataBinding;
 	import potato.component.core.ISprite;
+	import potato.component.core.RenderEvent;
 	import potato.component.core.RenderManager;
 	import potato.component.core.RenderType;
 	import potato.component.data.BitmapSkin;
@@ -352,6 +353,7 @@ package potato.component
 					_background=null;
 				}
 			}
+			this.dispatchEvent(new RenderEvent(RenderEvent.RENDER_COMPLETE));
 		}
 		
 		/**

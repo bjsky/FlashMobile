@@ -8,11 +8,11 @@ package potato.display3d
 	 * @author liuxin
 	 * 
 	 */
-	public class Effect extends GameContainer 
+	public class Effect extends EffectContainer 
 	{
 		public function Effect(data:EffectData)
 		{
-			super(data)
+			super(data);
 			
 		}
 		

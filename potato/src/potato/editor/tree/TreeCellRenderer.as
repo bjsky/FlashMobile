@@ -20,7 +20,7 @@ package potato.editor.tree
 	import potato.gesture.LongPressGesture;
 	import potato.gesture.TapGesture;
 	import potato.utils.Size;
-	import potato.utils.SkinUtil;
+	import potato.utils.Utils;
 	
 	/**
 	 * 树组件程视项渲染器
@@ -189,7 +189,7 @@ package potato.editor.tree
 		public function set iconSkins(value:String):void
 		{
 			_iconSkins=value;	
-			_iconSkinsArr=SkinUtil.fillArray(_iconSkinsArr,value,String);
+			_iconSkinsArr=Utils.fillArray(_iconSkinsArr,value,String);
 			for (var i:int=0;i<_iconSkinsArr.length;i++){
 				var skinStr:String=_iconSkinsArr[i];
 				if(skinStr){

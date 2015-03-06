@@ -2,6 +2,7 @@ package potato.display3d.controller.camera
 {
 	import core.display3d.Camera3D;
 	import core.display3d.ObjectContainer3D;
+	import core.events.Event;
 	
 	/**
 	 *  跟随相机
@@ -37,5 +38,25 @@ package potato.display3d.controller.camera
 			super.update();
 			
 		}               
+
+		private var _preX:Number=0;
+		private var _preY:Number=0;
+		private var _preZ:Number=0;
+		private var _preRX:Number=0;
+		private var _preRY:Number=0;
+		private var _preRZ:Number=0;
+		override protected function enterframeHandler(e:Event):void
+		{
+			if(lookAtObject.x != _preX || lookAtObject.y != _preY || lookAtObject.z!=_preZ
+				|| lookAtObject.rotationX != _preRX || lookAtObject.rotationY != _preRY || lookAtObject.rotationZ!= _preRZ){
+				lookAtObject = lookAtObject;
+				_preX = lookAtObject.x;
+				_preY = lookAtObject.y;
+				_preZ = lookAtObject.z;
+				_preRX = lookAtObject.rotationX;
+				_preRY = lookAtObject.rotationY;
+				_preRZ = lookAtObject.rotationZ;
+			}
+		}
 	}
 }

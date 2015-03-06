@@ -1,5 +1,10 @@
 package potato.utils
 {
+	import flash.net.registerClassAlias;
+	import flash.utils.ByteArray;
+	import flash.utils.getDefinitionByName;
+	import flash.utils.getQualifiedClassName;
+	
 	import core.filesystem.File;
 	import core.system.Capabilities;
 
@@ -584,6 +589,71 @@ package potato.utils
 					valid = false;
 			}
 			return valid;
+		}
+		
+		/**
+		 * 用字符串填充数组，并返回数组副本
+		 * @param arr 要填充的数组
+		 * @param str 源字符串
+		 * @param type 数组数据类型
+		 * @return 
+		 * 
+		 */
+		public static function fillArray(arr:Array, str:String, type:Class = null,separator:String=","):Array {
+			var temp:Array = arr.slice();
+			if (Boolean(str)) {
+				var a:Array = str.split(separator);
+				for (var i:int = 0, n:int = Math.min(temp.length, a.length); i < n; i++) {
+					var value:String = a[i];
+					temp[i] = (value == "true" ? true : (value == "false" ? false : value));
+					if (type != null) {
+						temp[i] = type(value);
+					}
+				}
+			}
+			return temp;
+		}
+		
+		/**
+		 * 对象深度拷贝 
+		 * @param object
+		 * @return 
+		 * 
+		 */
+		static public function cloneObject(object:Object):Object{
+			var qClassName:String = getQualifiedClassName(object);  
+			qClassName=qClassName.replace("::",".");
+			var objectType:Class = getDefinitionByName(qClassName) as Class;  
+			registerClassAlias(qClassName, objectType);//这里
+			var copier : ByteArray = new ByteArray();  
+			copier.writeObject(object);  
+			copier.position = 0;  
+			return copier.readObject();  
+		}
+		
+		
+		/**
+		 * 获取文件后缀 
+		 * @param path
+		 * @return 
+		 * 
+		 */
+		static public function pathSuffix(path:String):String{
+			var name:String = pathFileName(path);
+			if(/[.]/.exec(name))
+				return /[^.]+$/.exec(name.toLowerCase());
+			else
+				return "";
+		}
+		
+		/**
+		 * 获取文件名 
+		 * @param path
+		 * @return 
+		 * 
+		 */
+		static public function pathFileName(path:String):String{
+			return path.replace(/.*(\/|\\)/, "");
 		}
 	}
 }

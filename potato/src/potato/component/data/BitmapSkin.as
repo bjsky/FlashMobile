@@ -41,6 +41,24 @@ package potato.component.data
 			registerClassAlias("potato.component.data.BitmapSkin",BitmapSkin);
 		}
 		
+		public static function fillSkins(arr:Array,skins:*,separator:String=","):Array{
+			var temp:Array = arr.slice();
+			if (Boolean(skins)) {
+				if(skins is String)
+					var a:Array = skins.split(separator);
+				else if(skins is Array)
+					a=skins.slice();
+				for (var i:int = 0, n:int = Math.min(temp.length, a.length); i < n; i++) {
+					var value:* = a[i];
+					if (value is String) {
+						temp[i] = new BitmapSkin(value);
+					}else if(value is BitmapSkin){
+						temp[i] = value;
+					}
+				}
+			}
+			return temp;
+		}
 		
 		
 		private var _textureName:String;

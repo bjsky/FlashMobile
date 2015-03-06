@@ -8,13 +8,13 @@ package potato.component
 	
 	import potato.component.core.IDataBinding;
 	import potato.component.core.ISprite;
+	import potato.component.core.RenderEvent;
 	import potato.component.core.RenderManager;
 	import potato.component.core.RenderType;
 	import potato.component.data.BitmapSkin;
 	import potato.component.data.Padding;
 	import potato.component.data.TextFormat;
 	import potato.utils.Size;
-	import potato.utils.SkinUtil;
 	
 	/**
 	 * 文本输入事件
@@ -345,7 +345,7 @@ package potato.component
 		public function set skins(value:*):void
 		{
 			_skins=value;	
-			_skinsArr=SkinUtil.fillSkins(_skinsArr,value);
+			_skinsArr=BitmapSkin.fillSkins(_skinsArr,value);
 			for (var i:int=0;i<_skinsArr.length;i++){
 				_skinsMap[i]=_skinsArr[i];
 			}
@@ -540,6 +540,7 @@ package potato.component
 			_bitmap.height=height;
 			
 			renderText();
+			this.dispatchEvent(new RenderEvent(RenderEvent.RENDER_COMPLETE));
 		}
 		
 		/**

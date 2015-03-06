@@ -1,12 +1,22 @@
 package potato.component
 {
+	import flash.net.registerClassAlias;
 	import flash.utils.Dictionary;
 	
 	import core.display.DisplayObject;
 	import core.display.DisplayObjectContainer;
 	import core.filesystem.File;
+	import core.filters.BorderFilter;
+	import core.filters.ColorMatrixFilter;
+	import core.filters.ConvolutionFilter;
+	import core.filters.Filter;
+	import core.filters.ShadowFilter;
 	
 	import potato.component.core.ISprite;
+	import potato.component.data.BitmapSkin;
+	import potato.component.data.Padding;
+	import potato.component.data.TextFormat;
+	import potato.component.external.ActionData;
 	import potato.component.external.SpriteData;
 	import potato.component.external.ViewManager;
 	import potato.res.Res;
@@ -28,7 +38,6 @@ package potato.component
 		//--------------------------
 		//	IView
 		//--------------------------
-		private var _sourcePath:String;
 		private var _source:SpriteData;
 		private var _spriteMap:Dictionary=new Dictionary();
 		private var _sourceName:String;
@@ -43,8 +52,12 @@ package potato.component
 			if(_sourceName!=value)
 			{
 				_sourceName = value;
-				if(_sourceName)
-					sourcePath = Res.getViewSourcePath(_sourceName);
+				if(_sourceName){
+					registerAlias();
+					var path:String=Res.getViewSourcePath(_sourceName);
+					if(path)
+						loadSourceSprite(SpriteData(File.readByteArray(path).readObject()));
+				}
 			}
 			
 		}
@@ -54,47 +67,25 @@ package potato.component
 		 * @return 
 		 * 
 		 */
-		public function loadSource(data:SpriteData):void
+		public function loadSourceSprite(data:SpriteData):void
 		{
+			clearLoadSprite();
 			_source=data;
-			while(background.numChildren>0){
-				var child:DisplayObject=DisplayObjectContainer(background).removeChildAt(0);
-				child.dispose();
-				child=null;
-			}
-			ViewManager.loadView(_source,this);
+			ViewManager.cascadeSprite(_source,background,this);
 		}
 		
-//		private function loadComplete():void{
-//			ViewManager.cascadeSprite(_source,null,this,null,true);
-//		}
 		/**
 		 * 精灵视图 
 		 * @return 
 		 * 
 		 */
-		public function get sourceSprite():DisplayObjectContainer
+		public function clearLoadSprite():void
 		{
-			return background;
-		}
-		
-		/**
-		 * 精灵数据文件路径 
-		 * @return 
-		 * 
-		 */		
-		private function get sourcePath():String
-		{
-			return _sourcePath;
-		}
-		
-		private function set sourcePath(value:String):void
-		{
-			if(_sourcePath!=value){
-				_sourcePath = value;
-				ViewManager.registerAlias();
-				if(value)
-					loadSource(SpriteData(File.readByteArray(_sourcePath).readObject()));
+			_source=null;
+			while(background.numChildren>0){
+				var child:DisplayObject=DisplayObjectContainer(background).removeChildAt(0);
+				child.dispose();
+				child=null;
 			}
 		}
 
@@ -127,6 +118,7 @@ package potato.component
 		override public function dispose():void
 		{
 			super.dispose();
+			clearLoadSprite();
 			while(numChildren>0){
 				this.removeChildAt(0);
 			}
@@ -183,5 +175,27 @@ package potato.component
 				return max;
 			}
 		}
+		
+		/**
+		 * 注册序列化类 
+		 * 
+		 */
+		static public function registerAlias():void{
+			BitmapSkin.registerAlias();
+			Padding.registerAlias();
+			SpriteData.registerAlias();
+			ActionData.registerAlias();
+			TextFormat.registerAlias();
+			
+			registerClassAlias("core.filters.Filter",Filter);
+			registerClassAlias("core.filters.ColorMatrixFilter",ColorMatrixFilter);
+			registerClassAlias("core.filters.ShadowFilter",ShadowFilter);
+			registerClassAlias("core.filters.ConvolutionFilter",ConvolutionFilter);
+			registerClassAlias("core.filters.BorderFilter",BorderFilter);
+			//sprite
+			Bitmap;BorderContainer;Button;Container;List;ScrollContainer;Scroller;Slider;Text;TextInput;
+		}
+		
+
 	}
 }

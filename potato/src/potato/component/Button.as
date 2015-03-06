@@ -9,6 +9,7 @@ package potato.component
 	import potato.component.core.IDataBinding;
 	import potato.component.core.ISprite;
 	import potato.component.core.IToggle;
+	import potato.component.core.RenderEvent;
 	import potato.component.core.RenderManager;
 	import potato.component.core.RenderType;
 	import potato.component.data.BitmapSkin;
@@ -17,7 +18,6 @@ package potato.component
 	import potato.component.event.ToggleEvent;
 	import potato.gesture.GestureEvent;
 	import potato.gesture.TapGesture;
-	import potato.utils.SkinUtil;
 
 //	* <p>按钮可以设置text、htmlText文字，或者设置图片文字textSkin。设置文字时，通过设置textPadding文字填充改变文字的位置或者textFormat改变文字的内容样式</p>
 //		* <p>按钮实现了<code>IGroupedToggle</code>接口，可以指定从属的按钮组从而创建带选中状态的按钮组。
@@ -320,7 +320,7 @@ package potato.component
 		 */
 		public function set skins(value:*):void{
 			_skins=value;	
-			_skinsArr=SkinUtil.fillSkins(_skinsArr,value);
+			_skinsArr=BitmapSkin.fillSkins(_skinsArr,value);
 			for (var i:int=0;i<_skinsArr.length;i++){
 				_skinsMap[i]=_skinsArr[i];//BitmapSkin.createWithName(skinStr);
 			}
@@ -647,6 +647,7 @@ package potato.component
 				_textField.x=textPadding?textPadding.paddingLeft:0;
 				_textField.y=textPadding?textPadding.paddingTop:0;
 			}
+			this.dispatchEvent(new RenderEvent(RenderEvent.RENDER_COMPLETE));
 		}
 		
 		private function onBegin(e:TouchEvent):void{

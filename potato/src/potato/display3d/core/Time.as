@@ -125,8 +125,7 @@ package potato.display3d.core
 		
 		private static function timerHandler(e:TimerEvent):void
 		{
-			var behaivours:Vector.<IGameObject>=GameObject.findGameObjects(Behaviour);
-			for each(var behaivour:Behaviour in behaivours){
+			for each(var behaivour:Behaviour in BehaviourManager.behaviours){
 				if(behaivour._enable){
 					behaivour.fixedUpdate();
 				}
@@ -141,7 +140,7 @@ package potato.display3d.core
 			_deltaTime=_realDeltaTime*_timeScale;
 			_curTime+=_deltaTime;
 			
-			var behaivours:Vector.<IGameObject>=GameObject.findGameObjects(Behaviour);
+			var behaivours:Vector.<Behaviour>=BehaviourManager.behaviours;
 			for each(var behaivour:Behaviour in behaivours){
 				if(!behaivour._isStart){
 					behaivour._isStart=true;

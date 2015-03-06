@@ -521,7 +521,7 @@ package potato.component
 			var render:IListItem;
 			if(_itemRender!=null){
 				if(_itemRender is SpriteData){		//runtime
-					render=ViewManager.createSprite(SpriteData(itemRender)) as ViewListItemRenderer;
+					render=ViewManager.cascadeSprite(SpriteData(itemRender)) as ViewListItemRenderer;
 				}else{
 					render=new _itemRender() as IListItem;
 					if(render is TextListItemRenderer)

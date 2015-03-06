@@ -1,7 +1,9 @@
 package potato.display3d.controller.camera
 {
+	import core.display.Stage;
 	import core.display3d.Camera3D;
 	import core.display3d.ObjectContainer3D;
+	import core.events.Event;
 	
 	/**
 	 *  悬停相机
@@ -46,8 +48,9 @@ package potato.display3d.controller.camera
 		
 		override protected function update():void{
 			if(!_camera) return;
-			var panRadians:Number=_panAngle*Math.PI/180;
-			var tiltRadians:Number=_tiltAngle*Math.PI/180;
+			var panRadians:Number,tiltRadians:Number;
+			panRadians=_panAngle*Math.PI/180;
+			tiltRadians=_tiltAngle*Math.PI/180;
 			
 			_camera.x = _positionVector.x + _distance*Math.sin(panRadians)*Math.cos(tiltRadians);
 			_camera.z = _positionVector.z + _distance*Math.cos(panRadians)*Math.cos(tiltRadians);
@@ -55,6 +58,7 @@ package potato.display3d.controller.camera
 			
 			super.update();
 		}
+		
 		
 		///////////////////////
 		// 属性
@@ -136,6 +140,33 @@ package potato.display3d.controller.camera
 		}
 		public function get minTiltAngle():Number{
 			return _minTiltAngle;
+		}
+		
+		/**
+		 * 跟随目标 
+		 * @param object
+		 */
+		public function follow(object:ObjectContainer3D):void{
+			if(lookAtObject){
+				Stage.getStage().removeEventListener(Event.ENTER_FRAME,enterframeHandler);
+				lookAtObject=null;
+			}
+			if(object){
+				lookAtObject = object;
+				Stage.getStage().addEventListener(Event.ENTER_FRAME,enterframeHandler);
+			}
+		}
+		private var _preX:Number=0;
+		private var _preY:Number=0;
+		private var _preZ:Number=0;
+		protected function enterframeHandler(e:Event):void
+		{
+			if(lookAtObject.x != _preX || lookAtObject.y != _preY || lookAtObject.z!=_preZ){
+				lookAtObject = lookAtObject;
+				_preX = lookAtObject.x;
+				_preY = lookAtObject.y;
+				_preZ = lookAtObject.z;
+			}
 		}
 	}
 }

@@ -25,15 +25,22 @@ package potato.editor.layoutUI
 			
 			createLayout();
 			_layout.addEventListener(LayoutEvent.MEASURE,measureHandler);
+			_layout.addEventListener(LayoutEvent.RESIZE,resizeHandler);
 			
 			super();
 			//容器不可滚动
 			this.vScrollEnable=this.hScrollEnable=false;
 			this.vScrollerVisible=this.hScrollerVisible=false;
 		}
-		
 		use namespace potato_internal;
 		
+		
+		
+		private function resizeHandler(e:LayoutEvent):void
+		{
+			e.stopPropagation();
+			this.dispatchEvent(new LayoutEvent(LayoutEvent.RESIZE));
+		}
 		
 		//布局之后重新渲染
 		protected function measureHandler(e:LayoutEvent):void
@@ -44,6 +51,8 @@ package potato.editor.layoutUI
 				_laterChildHandlers.shift();
 			}
 			this.validate();
+			e.stopPropagation();
+			this.dispatchEvent(new LayoutEvent(LayoutEvent.MEASURE));
 		}
 		
 		protected var  _layout:Layout;

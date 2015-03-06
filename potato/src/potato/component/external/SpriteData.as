@@ -26,16 +26,14 @@ package potato.component.external
 			registerClassAlias("potato.component.data.SpriteData",SpriteData);
 		}
 		
+		private var _type:String;
 		
+		private var _runtime:String;
 		
 		private var _id:String = "";
 		
-		private var _type:String;
-		
 		private var _desc:String = "";
 
-		private var _runtime:String;
-		
 		private var _properties:Dictionary=new Dictionary();
 		
 		private var _children:Vector.<SpriteData>=new Vector.<SpriteData>();

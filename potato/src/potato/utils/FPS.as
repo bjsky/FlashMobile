@@ -2,84 +2,46 @@ package potato.utils
 {
 	import flash.utils.getTimer;
 	
-	import core.display.Image;
-	import core.display.Stage;
+	import core.display.DisplayObject;
 	import core.events.Event;
 	import core.system.System;
 
+	/**
+	 * 性能测试工具 
+	 * @author win7
+	 * 
+	 */
 	public class FPS
 	{
 		public function FPS()
 		{
-			Stage.getStage().addChild(_img);
-			_img.addEventListener(Event.ENTER_FRAME, onFrame);
 		}
 		
-		private var _img:Image=new Image(null);
-		private var last:uint;
-		private var ticks:uint;
-
-		private var _privateMemory:Number;
-		private var _totalMemory:Number;
-		private var _freeMemory:Number;
-		private var _version:String;
-		private var _fps:Number;
+		private static var _display:DisplayObject;
 		
-		public function get fps():Number
-		{
-			return _fps;
-		}
-
-		public function set fps(value:Number):void
-		{
-			_fps = value;
-		}
-
-		public function get version():String
-		{
-			return _version;
-		}
-
-		public function set version(value:String):void
-		{
-			_version = value;
-		}
-
-		public function get freeMemory():Number
-		{
-			return _freeMemory;
-		}
-
-		public function set freeMemory(value:Number):void
-		{
-			_freeMemory = value;
-		}
-
-		public function get totalMemory():Number
-		{
-			return _totalMemory;
-		}
-
-		public function set totalMemory(value:Number):void
-		{
-			_totalMemory = value;
-		}
-
-		public function get privateMemory():Number
-		{
-			return _privateMemory;
-		}
-
-		public function set privateMemory(value:Number):void
-		{
-			_privateMemory = value;
+		public static function test(display:DisplayObject):void{
+			_display=display;
+			_display.addEventListener(Event.ENTER_FRAME, onFrame);
 		}
 		
-		public function toString():String{
+		public static function stop():void{
+			_display.removeEventListener(Event.ENTER_FRAME, onFrame);
+		}
+		
+		private static var last:uint;
+		private static var ticks:uint;
+
+		private static var privateMemory:Number;
+		private static var totalMemory:Number;
+		private static var freeMemory:Number;
+		private static var version:String;
+		private static var fps:Number;
+		
+		public static function toString():String{
 			return "fps:"+fps+" priv:"+privateMemory+" total:"+totalMemory+" free:"+freeMemory+" ver:"+version;
 		}
 		
-		public function onFrame(e:Event):void
+		public static function onFrame(e:Event):void
 		{
 			if (last == 0)
 			{
@@ -100,12 +62,6 @@ package potato.utils
 				last = now;
 				ticks = 0;
 			}
-		}
-		
-		
-		public function dispose():void {
-			_img.removeEventListener(Event.ENTER_FRAME, onFrame);
-			 Stage.getStage().removeChild(_img);
 		}
 	}
 }

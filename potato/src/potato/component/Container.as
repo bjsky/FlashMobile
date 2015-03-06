@@ -114,8 +114,6 @@ package potato.component
 		 * 
 		 */
 		public function get measureWidth():Number{
-			commitMeasure();
-			
 			var max:Number = 0;
 			for (var i:int = numChildren - 1; i > -1; i--) {
 				var comp:DisplayObject = getChildAt(i);
@@ -155,8 +153,6 @@ package potato.component
 		 * 
 		 */
 		public function get measureHeight():Number{
-			commitMeasure();
-			
 			var max:Number = 0;
 			for (var i:int = numChildren - 1; i > -1; i--) {
 				var comp:DisplayObject = getChildAt(i);
@@ -200,15 +196,6 @@ package potato.component
 		//------------------------
 		// 渲染
 		//------------------------
-		
-		/**
-		 * 提交内容大小
-		 * 
-		 */
-		protected function commitMeasure():void{
-			
-		}
-		
 		/**
 		 * 渲染组件内容 
 		 * 
